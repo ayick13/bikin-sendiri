@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+// Pastikan nama file CSS ini sudah benar (misal: Home.module.css)
 import styles from './Home.module.css'; 
 import { Wand2, Copy, Check, Moon, Sun, LoaderCircle, Bot, Pilcrow } from 'lucide-react';
 
@@ -10,15 +11,13 @@ type AIModel = {
 };
 
 export default function AdvancedGenerator() {
-  // State untuk form inputs
   const [prompt, setPrompt] = useState('');
   const [details, setDetails] = useState('');
   const [model, setModel] = useState('openai'); // Model default sebagai fallback
   const [temperature, setTemperature] = useState(0.7);
   
-  // State untuk UI
   const [availableModels, setAvailableModels] = useState<AIModel[]>([]);
-  const [modelsLoaded, setModelsLoaded] = useState(false); // State untuk tracking
+  const [modelsLoaded, setModelsLoaded] = useState(false);
   const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,13 +33,11 @@ export default function AdvancedGenerator() {
         
         if (models && models.length > 0) {
             setAvailableModels(models);
-            setModel(models[0].id); // Set model default ke yang pertama dari API
+            setModel(models[0].id);
         }
       } catch (error) {
         console.error("Error fetching models, using fallback:", error);
-        // Biarkan availableModels kosong, sehingga fallback akan digunakan
       } finally {
-        // Tandai bahwa proses loading model telah selesai (baik berhasil maupun gagal)
         setModelsLoaded(true);
       }
     };
@@ -152,14 +149,15 @@ export default function AdvancedGenerator() {
           <div className={styles.controlsGrid}>
             <div className={styles.select}>
               <label htmlFor="model" className={styles.label}>Model</label>
+              {/* --- PERUBAHAN UTAMA DI SINI --- */}
               <select id="model" value={model} onChange={(e) => setModel(e.target.value)} className={styles.select} disabled={!modelsLoaded}>
                 {!modelsLoaded ? (
                   <option>Memuat model...</option>
                 ) : availableModels.length > 0 ? (
                   availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)
                 ) : (
+                  // Tampilkan teks yang lebih baik saat fallback
                   <option value="openai">OpenAI</option>
-      <option value="deepseek">DeepSeek</option>
                 )}
               </select>
             </div>
