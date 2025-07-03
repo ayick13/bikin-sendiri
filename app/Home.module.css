@@ -431,3 +431,32 @@
 .copyButton:hover:not(.copied) {
   background-color: #374151;
 }
+
+/* Gaya baru untuk overlay login */
+.loginOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7); /* Overlay gelap semi-transparan */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    border-radius: 12px;
+    z-index: 5; /* Pastikan overlay berada di atas elemen form */
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    backdrop-filter: blur(5px); /* Opsional: tambahkan efek blur */
+}
+
+/* Gaya baru untuk fieldset yang dinonaktifkan */
+.fieldsetDisabled {
+    opacity: 0.5; /* Secara visual membuat form terlihat redup */
+    pointer-events: none; /* Mencegah interaksi dengan elemen di bawahnya */
+}
