@@ -158,7 +158,8 @@ export default function AdvancedGenerator() {
                 ) : availableModels.length > 0 ? (
                   availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)
                 ) : (
-                  <option value="openai">Gagal memuat, gunakan default</option>
+                  <option value="openai">OpenAI</option>
+      <option value="deepseek">DeepSeek</option>
                 )}
               </select>
             </div>
