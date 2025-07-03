@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// Pastikan nama file CSS ini sudah benar sesuai file Anda (misal: Home.module.css)
 import styles from './Home.module.css'; 
 import { Wand2, Copy, Check, Moon, Sun, LoaderCircle, Bot, Pilcrow } from 'lucide-react';
 
-// Definisikan tipe untuk model yang kita fetch
 type AIModel = {
   id: string;
   name: string;
@@ -15,11 +13,12 @@ export default function AdvancedGenerator() {
   // State untuk form inputs
   const [prompt, setPrompt] = useState('');
   const [details, setDetails] = useState('');
-  const [model, setModel] = useState('openai');
+  const [model, setModel] = useState('openai'); // Model default sebagai fallback
   const [temperature, setTemperature] = useState(0.7);
+  
+  // State untuk UI
   const [availableModels, setAvailableModels] = useState<AIModel[]>([]);
-
-  // State untuk hasil dan UI
+  const [modelsLoaded, setModelsLoaded] = useState(false); // State untuk tracking
   const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -32,12 +31,17 @@ export default function AdvancedGenerator() {
         const response = await fetch('/api/get-models');
         if (!response.ok) throw new Error('Failed to load models');
         const models = await response.json();
-        setAvailableModels(models);
-        if (models.length > 0) {
-          setModel(models[0].id);
+        
+        if (models && models.length > 0) {
+            setAvailableModels(models);
+            setModel(models[0].id); // Set model default ke yang pertama dari API
         }
       } catch (error) {
-        console.error("Error fetching models:", error);
+        console.error("Error fetching models, using fallback:", error);
+        // Biarkan availableModels kosong, sehingga fallback akan digunakan
+      } finally {
+        // Tandai bahwa proses loading model telah selesai (baik berhasil maupun gagal)
+        setModelsLoaded(true);
       }
     };
     fetchModels();
@@ -51,7 +55,6 @@ export default function AdvancedGenerator() {
     }
   }, [isDarkMode]);
 
-  // Fungsi untuk menangani streaming response
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading) return;
@@ -83,44 +86,25 @@ export default function AdvancedGenerator() {
       if (!reader) throw new Error("Failed to read response body.");
       const decoder = new TextDecoder();
 
-      // --- LOGIKA BARU UNTUK MEMPROSES STREAM ---
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value);
-        // Memecah data mentah menjadi baris-baris, karena satu 'chunk' bisa berisi beberapa 'data:'
         const lines = chunk.split('\n');
-
         for (const line of lines) {
-          // Hanya proses baris yang berisi data
           if (line.startsWith('data: ')) {
-            // Hapus 'data: ' dari awal string
             const jsonString = line.substring(6);
-            
-            // Hentikan jika menerima sinyal [DONE]
-            if (jsonString.trim() === '[DONE]') {
-              return; // Keluar dari loop dan fungsi
-            }
-            
+            if (jsonString.trim() === '[DONE]') return;
             try {
-              // Ubah string menjadi objek JSON
               const parsed = JSON.parse(jsonString);
-              // Ambil konten teks dari dalam objek JSON
               const textChunk = parsed.choices?.[0]?.delta?.content;
-
               if (textChunk) {
-                // Tambahkan hanya potongan teks ke hasil
                 setResult((prev) => prev + textChunk);
               }
-            } catch (e) {
-              // Abaikan jika ada baris yang tidak valid, sering terjadi di awal atau akhir stream
-              // console.error("Could not parse JSON chunk:", jsonString);
-            }
+            } catch (e) { /* Abaikan chunk yang tidak valid */ }
           }
         }
       }
-
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -141,13 +125,11 @@ export default function AdvancedGenerator() {
     <div className={`${styles.container} ${isDarkMode ? 'dark' : ''}`}>
       <main className={styles.main}>
         <div className={styles.header}>
-          <h1 className={styles.title}>
-            AI Text <span>Pro</span>
-          </h1>
+          <h1 className={styles.title}>AI Text <span>Pro</span></h1>
           <label className={styles.toggleSwitch}>
             <input type="checkbox" checked={isDarkMode} onChange={() => setIsDarkMode(!isDarkMode)} />
             <span className={styles.toggleSlider}>
-                {isDarkMode ? <Moon size={16} style={{margin: 'auto', color: '#1f2937'}}/> : <Sun size={16} style={{margin: 'auto', color: 'white'}}/>}
+              {isDarkMode ? <Moon size={16} style={{margin: 'auto', color: '#1f2937'}}/> : <Sun size={16} style={{margin: 'auto', color: 'white'}}/>}
             </span>
           </label>
         </div>
@@ -155,58 +137,34 @@ export default function AdvancedGenerator() {
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="prompt" className={styles.label}>
-              <Pilcrow size={16} style={{ display: 'inline-block', marginRight: '0.5rem' }}/>
-              Prompt Utama
+              <Pilcrow size={16} style={{ display: 'inline-block', marginRight: '0.5rem' }}/> Prompt Utama
             </label>
-            <textarea
-              id="prompt"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Contoh: Tulis sebuah cerita pendek tentang persahabatan antara robot dan seekor kucing di kota Gresik"
-              rows={5}
-              className={styles.textarea}
-              required
-            />
+            <textarea id="prompt" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Contoh: Tulis sebuah cerita pendek..." rows={5} className={styles.textarea} required />
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="details" className={styles.label}>
-                <Bot size={16} style={{ display: 'inline-block', marginRight: '0.5rem' }}/>
-                Detail Tambahan (Gaya, Nada, Poin-poin Penting)
+              <Bot size={16} style={{ display: 'inline-block', marginRight: '0.5rem' }}/> Detail Tambahan
             </label>
-            <textarea
-              id="details"
-              value={details}
-              onChange={(e) => setDetails(e.target.value)}
-              placeholder="Gunakan gaya penulisan yang lucu dan santai. Sebutkan bahwa kucingnya bernama 'Oyen'."
-              rows={3}
-              className={styles.textarea}
-            />
+            <textarea id="details" value={details} onChange={(e) => setDetails(e.target.value)} placeholder="Gaya penulisan lucu, sebutkan kucing bernama 'Oyen'." rows={3} className={styles.textarea} />
           </div>
 
           <div className={styles.controlsGrid}>
             <div className={styles.select}>
               <label htmlFor="model" className={styles.label}>Model</label>
-              <select id="model" value={model} onChange={(e) => setModel(e.target.value)} className={styles.select} disabled={availableModels.length === 0}>
-                {availableModels.length === 0 ? (
-                    <option>Memuat model...</option>
+              <select id="model" value={model} onChange={(e) => setModel(e.target.value)} className={styles.select} disabled={!modelsLoaded}>
+                {!modelsLoaded ? (
+                  <option>Memuat model...</option>
+                ) : availableModels.length > 0 ? (
+                  availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)
                 ) : (
-                    availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)
+                  <option value="openai">Gagal memuat, gunakan default</option>
                 )}
               </select>
             </div>
             <div className={styles.sliderContainer}>
               <label htmlFor="temperature" className={styles.label}>Temperature: {temperature}</label>
-              <input
-                id="temperature"
-                type="range"
-                min="0"
-                max="2"
-                step="0.1"
-                value={temperature}
-                onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                className={styles.slider}
-              />
+              <input id="temperature" type="range" min="0" max="2" step="0.1" value={temperature} onChange={(e) => setTemperature(parseFloat(e.target.value))} className={styles.slider}/>
             </div>
           </div>
           
@@ -222,11 +180,9 @@ export default function AdvancedGenerator() {
             {error ? (
               <p style={{color: "var(--error-color)"}}><strong>Error:</strong> {error}</p>
             ) : (
-              <div className={`${styles.resultText} ${isLoading ? '' : styles.done}`}>
-                {result}
-              </div>
+              <div className={`${styles.resultText} ${isLoading ? '' : styles.done}`}>{result}</div>
             )}
-             {result && !isLoading && (
+            {result && !isLoading && (
               <button onClick={handleCopy} className={`${styles.button} ${styles.copyButton} ${isCopied ? styles.copied : ''}`}>
                 {isCopied ? <Check size={20} /> : <Copy size={20} />}
                 <span>{isCopied ? 'Copied!' : 'Copy to Clipboard'}</span>
