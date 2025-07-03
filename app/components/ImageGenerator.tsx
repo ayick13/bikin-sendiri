@@ -8,12 +8,18 @@ import * as Dialog from '@radix-ui/react-dialog';
 import styles from '../Home.module.css';
 import { 
     Image as ImageIcon, Wand2, Settings, LoaderCircle, Lock, Dices, 
-    XCircle, Sparkles, ZoomIn, X, Copy, Download, Repeat 
+    XCircle, Sparkles, ZoomIn, X, Copy, Download, Repeat, History, TriangleAlert, ChevronDown
 } from 'lucide-react';
 import { Toaster, toast } from 'react-hot-toast';
 import PresetButton from './PresetButton';
 
 type ImageModel = { id: string; };
+type HistoryItem = {
+    id: string;
+    imageUrl: string;
+    prompt: string;
+    seed: number | '';
+};
 
 export default function ImageGenerator() {
   const { data: session } = useSession();
@@ -33,6 +39,28 @@ export default function ImageGenerator() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [error, setError] = useState('');
   const [availableModels, setAvailableModels] = useState<ImageModel[]>([]);
+  
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [isZoomed, setIsZoomed] = useState(false);
+
+  useEffect(() => {
+    try {
+      const savedHistory = localStorage.getItem('imageHistory');
+      if (savedHistory) {
+        setHistory(JSON.parse(savedHistory));
+      }
+    } catch (e) {
+        console.error("Gagal memuat riwayat dari localStorage", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('imageHistory', JSON.stringify(history));
+    } catch(e) {
+        console.error("Gagal menyimpan riwayat ke localStorage", e);
+    }
+  }, [history]);
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -40,10 +68,8 @@ export default function ImageGenerator() {
         const response = await fetch('https://image.pollinations.ai/models');
         if (!response.ok) throw new Error('Gagal memuat model gambar');
         const modelsData = await response.json();
-        const models = modelsData.map((id: string) => ({ id }));
-        setAvailableModels(models);
+        setAvailableModels(modelsData.map((id: string) => ({ id })));
       } catch (err: any) {
-        console.error(err.message);
         toast.error('Gagal mengambil daftar model AI.');
       }
     };
@@ -63,6 +89,7 @@ export default function ImageGenerator() {
       setIsEnhancing(true);
       const enhancingToast = toast.loading('AI sedang menyempurnakan prompt...');
       const systemPromptForImage = `You are an expert prompt engineer for AI image generators like Midjourney or Stable Diffusion. Your task is to take the user's simple input and expand it into a rich, detailed, and descriptive prompt. Do not ask questions or explain your process. Only output the final, enhanced prompt as a single paragraph of comma-separated keywords and phrases, ready to be used for image generation.`;
+      
       try {
           const response = await fetch('/api/generate-text', {
               method: 'POST',
@@ -109,6 +136,7 @@ export default function ImageGenerator() {
     const loadingToast = toast.loading('AI sedang menggambar...');
     const currentSeed = newSeed || seed || Math.floor(Math.random() * 1000000);
     if(newSeed) { setSeed(newSeed); } else if (!seed) { setSeed(currentSeed); }
+    
     const fullPrompt = negativePrompt ? `${prompt} --neg ${negativePrompt}` : prompt;
     const params = new URLSearchParams({
       model,
@@ -122,15 +150,29 @@ export default function ImageGenerator() {
       private: isPrivate.toString(),
     });
     const apiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?${params.toString()}`;
+    
     try {
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error(`API Error: ${response.status} - Gagal menghasilkan gambar.`);
         const imageBlob = await response.blob();
         if (!imageBlob.type.startsWith('image/')) throw new Error('Respons dari API bukan gambar.');
+        
         const localUrl = URL.createObjectURL(imageBlob);
         setImageUrl(localUrl);
         toast.dismiss(loadingToast);
         toast.success('Gambar berhasil dibuat!');
+        
+        setHistory(prevHistory => {
+            const newHistoryItem: HistoryItem = { id: new Date().toISOString(), imageUrl: localUrl, prompt, seed: currentSeed };
+            const updatedHistory = [newHistoryItem, ...prevHistory];
+            if (updatedHistory.length > 5) {
+                const oldestItem = updatedHistory.pop();
+                if(oldestItem) URL.revokeObjectURL(oldestItem.imageUrl);
+                toast('Gambar tertua di riwayat telah dihapus.', { icon: <TriangleAlert size={18} />, duration: 4000 });
+            }
+            return updatedHistory;
+        });
+
     } catch (err: any) {
         setError(err.message);
         toast.dismiss(loadingToast);
@@ -140,22 +182,9 @@ export default function ImageGenerator() {
     }
   };
   
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      generateImage();
-  };
-
-  const handleVariations = () => {
-    toast('Membuat variasi dengan seed baru...', { icon: '🎨' });
-    const newSeed = Math.floor(Math.random() * 1000000);
-    generateImage(newSeed);
-  };
-  
-  const handleCopyPrompt = () => {
-      navigator.clipboard.writeText(prompt);
-      toast.success('Prompt disalin ke clipboard!');
-  };
-  
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => { e.preventDefault(); generateImage(); };
+  const handleVariations = () => { generateImage(Math.floor(Math.random() * 1000000)); };
+  const handleCopyPrompt = () => { navigator.clipboard.writeText(prompt); toast.success('Prompt disalin ke clipboard!'); };
   const handleDownload = () => {
     if (!imageUrl) return;
     const link = document.createElement('a');
@@ -166,24 +195,20 @@ export default function ImageGenerator() {
     document.body.removeChild(link);
     toast.success('Gambar diunduh!');
   };
+  const generateRandomSeed = () => { const newSeed = Math.floor(Math.random() * 1000000); setSeed(newSeed); toast(`Seed baru: ${newSeed}`); };
+  const setPresetSize = (pWidth: number, pHeight: number) => { setWidth(pWidth); setHeight(pHeight); toast(`Ukuran diatur ke: ${pWidth}x${pHeight}`); };
+  const viewHistoryImage = (item: HistoryItem) => { setImageUrl(item.imageUrl); setPrompt(item.prompt); setSeed(item.seed); toast('Memuat gambar dari riwayat.'); };
 
-  const generateRandomSeed = () => {
-    const newSeed = Math.floor(Math.random() * 1000000);
-    setSeed(newSeed);
-    toast(`Seed baru: ${newSeed}`);
-  };
-
-  const setPresetSize = (pWidth: number, pHeight: number) => {
-      setWidth(pWidth);
-      setHeight(pHeight);
-      toast(`Ukuran diatur ke: ${pWidth}x${pHeight}`);
-  };
-  
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
       <form onSubmit={handleSubmit} className={styles.form} style={{ position: 'relative' }} autoComplete="off">
-        {/* ... (isi form tidak berubah) ... */}
+        {!isLoggedIn && (
+          <div className={styles.loginOverlay}>
+            <Lock size={48} />
+            <p>Login untuk mengakses fitur Generate Gambar ini.</p>
+          </div>
+        )}
         <fieldset className={!isLoggedIn ? styles.fieldsetDisabled : ''} disabled={!isLoggedIn || isLoading || isEnhancing}>
           <div className={styles.formGroup}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem'}}>
@@ -199,30 +224,29 @@ export default function ImageGenerator() {
                    </button>
                 </div>
             </div>
-            <textarea
-              id="prompt-image"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Contoh: seekor kucing astronot, memakai helm kaca..."
-              rows={4}
-              className={styles.textarea}
-              required
-            />
+            <textarea id="prompt-image" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Contoh: seekor kucing astronot..." rows={4} className={styles.textarea} required />
           </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="negative-prompt" className={styles.label}>Negative Prompt (Opsional)</label>
-            <input id="negative-prompt" type="text" value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} placeholder="Contoh: teks, watermark, kualitas buruk" className={styles.input} />
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Preset Ukuran</label>
-            <div className={styles.presetContainer}>
-                <PresetButton label="Square" width={1024} height={1024} onClick={setPresetSize} />
-                <PresetButton label="Portrait" width={1024} height={1792} onClick={setPresetSize} />
-                <PresetButton label="Landscape" width={1792} height={1024} onClick={setPresetSize} />
-            </div>
-          </div>
+          
           <details className={styles.advancedSettings}>
-            <summary><Settings size={16} /> Pengaturan Lanjutan</summary>
+            <summary className={styles.summaryButton}>
+                <Settings size={16} /> 
+                Pengaturan Lanjutan
+                <ChevronDown size={20} className={styles.summaryIcon} />
+            </summary>
+            
+            <div className={styles.formGroup} style={{marginTop: '1.5rem'}}>
+              <label htmlFor="negative-prompt" className={styles.label}>Negative Prompt (Opsional)</label>
+              <input id="negative-prompt" type="text" value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} placeholder="Contoh: teks, watermark..." className={styles.input} />
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Preset Ukuran</label>
+              <div className={styles.presetContainer}>
+                  <PresetButton label="Square" width={1024} height={1024} onClick={setPresetSize} />
+                  <PresetButton label="Portrait" width={1024} height={1792} onClick={setPresetSize} />
+                  <PresetButton label="Landscape" width={1792} height={1024} onClick={setPresetSize} />
+              </div>
+            </div>
+            
             <div className={styles.controlsGrid}>
               <div className={styles.formGroup}>
                 <label htmlFor="model-image" className={styles.label}>Model</label>
@@ -253,6 +277,7 @@ export default function ImageGenerator() {
                 <label htmlFor="private-image">Jangan tampilkan di feed publik</label>
             </div>
           </details>
+
           <button type="submit" className={styles.button} disabled={isLoading || !isLoggedIn || isEnhancing}>
             {isLoading ? <LoaderCircle size={22} className={styles.loadingIcon} /> : <Wand2 size={22} />}
             <span>{isLoading ? 'Generating...' : 'Generate Gambar'}</span>
@@ -264,49 +289,25 @@ export default function ImageGenerator() {
         <div className={styles.resultCard}>
             <h2 className={styles.resultHeader}><ImageIcon size={24}/> Hasil Gambar</h2>
             {error && <p style={{color: "var(--error-color)"}}><strong>Error:</strong> {error}</p>}
-            
-            {isLoading && !imageUrl &&(
-                <div className={styles.imageLoadingContainer}>
-                    <LoaderCircle size={48} className={styles.loadingIcon} />
-                    <p>AI sedang menggambar, mohon tunggu...</p>
-                </div>
-            )}
-            
+            {isLoading && !imageUrl && (<div className={styles.imageLoadingContainer}><LoaderCircle size={48} className={styles.loadingIcon} /><p>AI sedang menggambar...</p></div>)}
             {imageUrl && !error && (
-                <Dialog.Root>
+                <Dialog.Root open={isZoomed} onOpenChange={setIsZoomed}>
                     <div className={styles.imageResultContainer}>
-                       <Image 
-                            src={imageUrl} 
-                            alt={prompt}
-                            width={512}
-                            height={512}
-                            style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
-                            key={imageUrl}
-                        />
-                         <Dialog.Trigger asChild>
-                            <button className={styles.zoomButton} title="Perbesar Gambar">
-                                <ZoomIn size={20} />
-                            </button>
-                        </Dialog.Trigger>
+                       <Image src={imageUrl} alt={prompt} width={512} height={512} style={{ width: '100%', height: 'auto', borderRadius: '8px' }} key={imageUrl} />
+                       <Dialog.Trigger asChild>
+                          <button className={styles.zoomButton} title="Perbesar Gambar"><ZoomIn size={20} /></button>
+                       </Dialog.Trigger>
                     </div>
                     <div className={styles.actionButtonsContainer}>
                         <button onClick={handleCopyPrompt} className={styles.actionButton} title="Salin Prompt"><Copy size={16} /> Salin</button>
                         <button onClick={handleVariations} className={styles.actionButton} title="Buat Variasi"><Repeat size={16} /> Variasi</button>
                         <button onClick={handleDownload} className={styles.actionButton} title="Unduh Gambar"><Download size={16} /> Unduh</button>
                     </div>
-
                     <Dialog.Portal>
                         <Dialog.Overlay className={styles.zoomOverlay} />
                         <Dialog.Content className={styles.zoomContent}>
-                             {/* FIX: Menambahkan Dialog.Title yang tersembunyi */}
-                            <Dialog.Title className={styles.visuallyHidden}>Gambar Diperbesar</Dialog.Title>
-                            
-                            <Image 
-                                src={imageUrl} 
-                                alt={`Zoomed in: ${prompt}`}
-                                layout="fill"
-                                objectFit="contain"
-                            />
+                            <Dialog.Title className={styles.visuallyHidden}>Gambar Diperbesar: {prompt}</Dialog.Title>
+                            <Image src={imageUrl} alt={`Zoomed in: ${prompt}`} layout="fill" objectFit="contain" />
                             <Dialog.Close asChild>
                                 <button className={styles.zoomCloseButton} title="Tutup"><X size={28} /></button>
                             </Dialog.Close>
@@ -315,6 +316,18 @@ export default function ImageGenerator() {
                 </Dialog.Root>
             )}
         </div>
+      )}
+      {history.length > 0 && (
+          <div className={styles.historyContainer}>
+              <h3 className={styles.historyTitle}><History size={18} /> Riwayat Gambar</h3>
+              <div className={styles.historyGrid}>
+                  {history.map(item => (
+                      <div key={item.id} className={styles.historyItem} onClick={() => viewHistoryImage(item)} title={`Lihat: "${item.prompt}"`}>
+                          <Image src={item.imageUrl} alt={item.prompt} width={100} height={100} style={{ objectFit: 'cover' }} />
+                      </div>
+                  ))}
+              </div>
+          </div>
       )}
     </>
   );

@@ -306,27 +306,41 @@
 }
 
 /* Pengaturan Lanjutan */
-.advancedSettings {
-  margin-top: 2rem;
-  border-top: 1px solid var(--border-color);
-  padding-top: 1.5rem;
-}
-
-.advancedSettings summary {
+.summaryButton {
   font-weight: 600;
   cursor: pointer;
-  color: var(--text-secondary-color);
-  list-style: none; /* Hapus panah default */
+  color: var(--text-primary-color);
+  list-style: none; 
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.75rem 1rem; /* Memberi padding seperti tombol */
+  border-radius: 8px; /* Membuat sudut membulat */
+  background-color: var(--input-background-color); /* Warna latar belakang */
+  border: 1px solid var(--border-color); /* Garis batas */
+  width: 100%; /* Memanjang penuh */
+  transition: all 0.2s;
+  justify-content: space-between; /* Mendorong ikon panah ke kanan */
 }
 
-.advancedSettings summary::-webkit-details-marker {
-  display: none; /* Hapus panah default di Chrome */
+.summaryButton:hover {
+  background-color: var(--border-color);
 }
 
-.advancedSettings[open] summary {
+.summaryButton::-webkit-details-marker {
+  display: none; 
+}
+
+/* Mengatur transisi panah saat dibuka/ditutup */
+.summaryIcon {
+    transition: transform 0.2s ease-in-out;
+}
+
+details[open] .summaryIcon {
+    transform: rotate(180deg);
+}
+
+.advancedSettings[open] .summaryButton {
   margin-bottom: 1.5rem;
 }
 
@@ -818,4 +832,53 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+/* === Gaya Baru untuk Riwayat Gambar === */
+.historyContainer {
+    margin-top: 2.5rem;
+    padding: 2rem;
+    border-radius: 12px;
+    background-color: var(--card-background-color);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.historyTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.historyGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+}
+
+.historyItem {
+    position: relative;
+    width: 100%;
+    padding-top: 100%; /* Membuat kotak aspek 1:1 */
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+    border: 1px solid var(--border-color);
+}
+
+.historyItem img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Memastikan gambar mengisi kotak */
+}
+
+.historyItem:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
