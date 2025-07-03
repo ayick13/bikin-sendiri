@@ -1,20 +1,17 @@
 // app/components/TextPromptGenerator.tsx
-
-'use client'; // Pastikan ini ada di baris paling atas
+'use client';
 
 import { useState, useEffect } from 'react';
-// Path CSS diubah untuk menyesuaikan lokasi baru
 import styles from '../Home.module.css'; 
 import { Wand2, Copy, Check, LoaderCircle, Bot, Pilcrow, SlidersHorizontal, ChevronDown, Dices, Settings } from 'lucide-react';
+import CustomSelect from './CustomSelect';
 
 type AIModel = { id: string; name: string; };
 
-// Ubah nama fungsi agar lebih deskriptif
 export default function TextPromptGenerator() {
   const [systemPrompt, setSystemPrompt] = useState(
     'You are an expert prompt engineer for AI image generators. Your task is to take the user\'s simple input and expand it into a rich, detailed, and descriptive prompt. Do not ask questions. Do not explain your process. Only output the final, enhanced prompt as a single paragraph of comma-separated keywords and phrases.'
   );
-
   const [prompt, setPrompt] = useState('');
   const [details, setDetails] = useState('');
   const [model, setModel] = useState('openai');
@@ -76,8 +73,12 @@ export default function TextPromptGenerator() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Server responded with status ${response.status}`);
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Server responded with status ${response.status}`);
+        } catch (jsonError) {
+          throw new Error(`An error occurred. Server responded with status ${response.status}`);
+        }
       }
 
       const reader = response.body?.getReader();
@@ -92,7 +93,7 @@ export default function TextPromptGenerator() {
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const jsonString = line.substring(6);
-            if (jsonString.trim() === '[DONE]') { setIsLoading(false); return; }
+            if (jsonString.trim() === '[DONE]') { setIsLoading(false); return; };
             try {
               const parsed = JSON.parse(jsonString);
               const textChunk = parsed.choices?.[0]?.delta?.content;
@@ -110,14 +111,25 @@ export default function TextPromptGenerator() {
     }
   };
   
-  const handleCopy = () => { /* ... (fungsi handleCopy tetap sama) ... */ };
-  const generateRandomSeed = () => { /* ... (fungsi generateRandomSeed tetap sama) ... */ };
+  const handleCopy = () => {
+    if (result) {
+      navigator.clipboard.writeText(result).then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      });
+    }
+  };
+  
+  const generateRandomSeed = () => {
+    setSeed(Math.floor(Math.random() * 1000000));
+  };
+
+  const modelOptions = availableModels.map(m => ({ value: m.id, label: m.name }));
+  const fallbackModelOption = [{ value: 'openai', label: 'OpenAI (Default)' }];
 
   return (
     <>
       <form onSubmit={handleSubmit} className={styles.form}>
-        {/* ... Seluruh isi <form> dari page.tsx sebelumnya dipindahkan ke sini ... */}
-        {/* ... (Ini termasuk semua formGroup, controlsGrid, details, dan button) ... */}
         <div className={styles.formGroup}>
             <label htmlFor="systemPrompt" className={styles.label}><Settings size={16}/> System Prompt (Peran AI)</label>
             <textarea id="systemPrompt" value={systemPrompt} onChange={(e) => setSystemPrompt(e.target.value)} placeholder="Contoh: Anda adalah seorang penulis cerita fiksi ilmiah yang puitis." rows={4} className={styles.textarea} />
@@ -132,18 +144,55 @@ export default function TextPromptGenerator() {
         </div>
         <details className={styles.advancedSettings}>
             <summary><SlidersHorizontal size={16}/> Pengaturan Lanjutan <ChevronDown size={20} /></summary>
-            <div className={styles.controlsGrid}><div className={styles.select}><label htmlFor="model" className={styles.label}>Model</label><select id="model" value={model} onChange={(e) => setModel(e.target.value)} className={styles.select} disabled={!modelsLoaded}>{!modelsLoaded ? ( <option>Memuat model...</option> ) : availableModels.length > 0 ? ( availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>) ) : ( <option value="openai">OpenAI (Default)</option> )}</select></div><div className={styles.formGroup}><label htmlFor="seed" className={styles.label}>Seed</label><div className={styles.seedContainer}><input id="seed" type="number" value={seed} onChange={(e) => setSeed(e.target.value ? parseInt(e.target.value) : '')} placeholder="Angka acak" className={styles.input}/><button type="button" onClick={generateRandomSeed} aria-label="Generate random seed"><Dices size={18}/></button></div></div></div>
-            <div className={styles.controlsGrid}><div className={styles.sliderContainer}><label htmlFor="temperature" className={styles.label}>Temperature: {temperature}</label><input id="temperature" type="range" min="0" max="2" step="0.1" value={temperature} onChange={(e) => setTemperature(parseFloat(e.target.value))} className={styles.slider}/></div><div className={styles.sliderContainer}><label htmlFor="topP" className={styles.label}>Top P: {topP}</label><input id="topP" type="range" min="0" max="1" step="0.05" value={topP} onChange={(e) => setTopP(parseFloat(e.target.value))} className={styles.slider}/></div></div>
-            <div className={styles.formGroup}><label htmlFor="freqPenalty" className={styles.label}>Frequency Penalty: {freqPenalty}</label><input id="freqPenalty" type="range" min="-2.0" max="2.0" step="0.1" value={freqPenalty} onChange={(e) => setFreqPenalty(parseFloat(e.target.value))} className={styles.slider}/></div>
+            <div className={styles.controlsGrid}>
+              <div className={styles.select}>
+                <label htmlFor="model" className={styles.label}>Model</label>
+                <CustomSelect
+                  placeholder={!modelsLoaded ? "Memuat model..." : "Pilih model"}
+                  options={modelsLoaded && modelOptions.length > 0 ? modelOptions : fallbackModelOption}
+                  value={model}
+                  onValueChange={setModel}
+                  disabled={!modelsLoaded}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="seed" className={styles.label}>Seed</label>
+                <div className={styles.seedContainer}>
+                    <input id="seed" type="number" value={seed} onChange={(e) => setSeed(e.target.value ? parseInt(e.target.value) : '')} placeholder="Angka acak" className={styles.input}/>
+                    <button type="button" onClick={generateRandomSeed} aria-label="Generate random seed"><Dices size={18}/></button>
+                </div>
+              </div>
+            </div>
+            <div className={styles.controlsGrid}>
+                <div className={styles.sliderContainer}>
+                  <label htmlFor="temperature" className={styles.label}>Temperature: {temperature}</label>
+                  <input id="temperature" type="range" min="0" max="2" step="0.1" value={temperature} onChange={(e) => setTemperature(parseFloat(e.target.value))} className={styles.slider}/>
+                </div>
+                <div className={styles.sliderContainer}>
+                  <label htmlFor="topP" className={styles.label}>Top P: {topP}</label>
+                  <input id="topP" type="range" min="0" max="1" step="0.05" value={topP} onChange={(e) => setTopP(parseFloat(e.target.value))} className={styles.slider}/>
+                </div>
+            </div>
+            <div className={styles.formGroup}>
+                <label htmlFor="freqPenalty" className={styles.label}>Frequency Penalty: {freqPenalty}</label>
+                <input id="freqPenalty" type="range" min="-2.0" max="2.0" step="0.1" value={freqPenalty} onChange={(e) => setFreqPenalty(parseFloat(e.target.value))} className={styles.slider}/>
+            </div>
         </details>
-        <button type="submit" disabled={isLoading} className={styles.button}>{isLoading ? <LoaderCircle size={22} className={styles.loadingIcon} /> : <Wand2 size={22} />}<span>{isLoading ? 'Generating...' : 'Generate Text'}</span></button>
+        <button type="submit" disabled={isLoading} className={styles.button}>
+            {isLoading ? <LoaderCircle size={22} className={styles.loadingIcon} /> : <Wand2 size={22} />}
+            <span>{isLoading ? 'Generating...' : 'Generate Text'}</span>
+        </button>
       </form>
       {(error || result) && (
         <div className={styles.resultCard}>
           <h2 className={styles.resultHeader}><Bot size={24}/> AI Generated Text</h2>
-          {error ? ( <p style={{color: "var(--error-color)"}}><strong>Error:</strong> {error}</p> ) : ( <div className={`${styles.resultText} ${isLoading ? '' : styles.done}`}>{result}</div> )}
+          {error ? ( <p style={{color: "var(--error-color)"}}><strong>Error:</strong> {error}</p> ) 
+          : ( <div className={`${styles.resultText} ${isLoading ? '' : styles.done}`}>{result}</div> )}
           {result && !isLoading && (
-            <button onClick={handleCopy} className={`${styles.button} ${styles.copyButton} ${isCopied ? styles.copied : ''}`}>{isCopied ? <Check size={20} /> : <Copy size={20} />}<span>{isCopied ? 'Copied!' : 'Copy to Clipboard'}</span></button>
+            <button onClick={handleCopy} className={`${styles.button} ${styles.copyButton} ${isCopied ? styles.copied : ''}`}>
+                {isCopied ? <Check size={20} /> : <Copy size={20} />}
+                <span>{isCopied ? 'Copied!' : 'Copy to Clipboard'}</span>
+            </button>
           )}
         </div>
       )}

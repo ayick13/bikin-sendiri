@@ -1,17 +1,49 @@
 // app/components/VideoPromptGenerator.tsx
-
 'use client';
 
 import { useState } from 'react';
 import styles from '../Home.module.css';
 import { Film, Clapperboard, Camera, Palette, Sparkles, Wand2, Copy, Check } from 'lucide-react';
+import CustomSelect from './CustomSelect';
+
+const moodOptions = [
+  { value: 'Cinematic', label: 'Cinematic' },
+  { value: 'Dramatic', label: 'Dramatic' },
+  { value: 'Eerie', label: 'Eerie' },
+  { value: 'Nostalgic', label: 'Nostalgic' },
+  { value: 'Epic', label: 'Epic' },
+  { value: 'Dreamy', label: 'Dreamy' },
+];
+
+const styleOptions = [
+  { value: 'Realistic', label: 'Realistic' },
+  { value: 'Anime', label: 'Anime' },
+  { value: 'Claymation', label: 'Claymation' },
+  { value: 'Documentary', label: 'Documentary' },
+  { value: 'Found Footage', label: 'Found Footage' },
+  { value: 'Vintage Film', label: 'Vintage Film' },
+];
+
+const cameraOptions = [
+    { value: 'Dynamic drone shot', label: 'Dynamic drone shot' },
+    { value: 'Extreme close-up', label: 'Extreme close-up' },
+    { value: 'Wide shot', label: 'Wide shot' },
+    { value: 'First-person view (FPV)', label: 'First-person view (FPV)' },
+    { value: 'Handheld shot', label: 'Handheld shot' },
+];
+
+const lensOptions = [
+    { value: '35mm', label: '35mm' },
+    { value: '50mm', label: '50mm' },
+    { value: '85mm Portrait', label: '85mm Portrait' },
+    { value: 'Telephoto lens', label: 'Telephoto lens' },
+    { value: 'Wide-angle lens', label: 'Wide-angle lens' },
+];
 
 export default function VideoPromptGenerator() {
-    const [prompt, setPrompt] = useState('');
     const [result, setResult] = useState('');
     const [isCopied, setIsCopied] = useState(false);
     
-    // State untuk semua parameter video
     const [subject, setSubject] = useState('a majestic eagle');
     const [action, setAction] = useState('soaring through a thunderstorm');
     const [mood, setMood] = useState('Cinematic');
@@ -24,8 +56,6 @@ export default function VideoPromptGenerator() {
 
     const generateVideoPrompt = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
-        // Gabungkan semua parameter menjadi satu prompt yang koheren
         const fullPrompt = `${subject}, ${action}, ${mood} atmosphere, ${style} style, ${color}, ${camera}, shot on ${lens} lens, ${lighting}, ${quality}`;
         setResult(fullPrompt);
         setIsCopied(false);
@@ -52,12 +82,8 @@ export default function VideoPromptGenerator() {
                 <div className={styles.formGroup}>
                     <label className={styles.label}><Palette size={16}/> Mood & Style</label>
                     <div className={styles.controlsGrid}>
-                        <select value={mood} onChange={e => setMood(e.target.value)} className={styles.select}>
-                            <option>Cinematic</option><option>Dramatic</option><option>Eerie</option><option>Nostalgic</option><option>Epic</option><option>Dreamy</option>
-                        </select>
-                        <select value={style} onChange={e => setStyle(e.target.value)} className={styles.select}>
-                            <option>Realistic</option><option>Anime</option><option>Claymation</option><option>Documentary</option><option>Found Footage</option><option>Vintage Film</option>
-                        </select>
+                        <CustomSelect options={moodOptions} value={mood} onValueChange={setMood} placeholder="Pilih Mood" />
+                        <CustomSelect options={styleOptions} value={style} onValueChange={setStyle} placeholder="Pilih Style" />
                     </div>
                     <input type="text" value={color} onChange={e => setColor(e.target.value)} placeholder="Palet warna..." className={styles.input} style={{marginTop: '1rem'}}/>
                 </div>
@@ -65,12 +91,8 @@ export default function VideoPromptGenerator() {
                 <div className={styles.formGroup}>
                     <label className={styles.label}><Camera size={16}/> Advanced Setting (Camera)</label>
                     <div className={styles.controlsGrid}>
-                        <select value={camera} onChange={e => setCamera(e.target.value)} className={styles.select}>
-                           <option>Dynamic drone shot</option><option>Extreme close-up</option><option>Wide shot</option><option>First-person view (FPV)</option><option>Handheld shot</option>
-                        </select>
-                         <select value={lens} onChange={e => setLens(e.target.value)} className={styles.select}>
-                           <option>35mm</option><option>50mm</option><option>85mm Portrait</option><option>Telephoto lens</option><option>Wide-angle lens</option>
-                        </select>
+                       <CustomSelect options={cameraOptions} value={camera} onValueChange={setCamera} placeholder="Pilih Tipe Shot" />
+                       <CustomSelect options={lensOptions} value={lens} onValueChange={setLens} placeholder="Pilih Lensa" />
                     </div>
                     <input type="text" value={lighting} onChange={e => setLighting(e.target.value)} placeholder="Pencahayaan..." className={styles.input} style={{marginTop: '1rem'}} />
                 </div>
