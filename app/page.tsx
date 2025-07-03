@@ -91,7 +91,10 @@ export default function AdvancedGenerator() {
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const jsonString = line.substring(6);
-            if (jsonString.trim() === '[DONE]') return;
+            if (jsonString.trim() === '[DONE]') {
+              setIsLoading(false); // Pastikan loading berhenti saat stream selesai
+              return;
+            };
             try {
               const parsed = JSON.parse(jsonString);
               const textChunk = parsed.choices?.[0]?.delta?.content;
@@ -149,15 +152,13 @@ export default function AdvancedGenerator() {
           <div className={styles.controlsGrid}>
             <div className={styles.select}>
               <label htmlFor="model" className={styles.label}>Model</label>
-              {/* --- PERUBAHAN UTAMA DI SINI --- */}
               <select id="model" value={model} onChange={(e) => setModel(e.target.value)} className={styles.select} disabled={!modelsLoaded}>
                 {!modelsLoaded ? (
                   <option>Memuat model...</option>
                 ) : availableModels.length > 0 ? (
                   availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)
                 ) : (
-                  // Tampilkan teks yang lebih baik saat fallback
-                  <option value="openai">OpenAI</option>
+                  <option value="openai">OpenAI (Default)</option>
                 )}
               </select>
             </div>
