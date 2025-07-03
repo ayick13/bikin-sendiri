@@ -4,23 +4,23 @@ import { useState, useEffect } from 'react';
 import styles from './Home.module.css'; 
 import { Wand2, Copy, Check, Moon, Sun, LoaderCircle, Bot, Pilcrow, SlidersHorizontal, ChevronDown, Dices, Settings } from 'lucide-react';
 
-type AIModel = {
-  id: string;
-  name: string;
-};
+type AIModel = { id: string; name: string; };
 
 export default function AdvancedGenerator() {
-  // State untuk form inputs
+  // --- PERUBAHAN UTAMA DI SINI ---
+  // Kita berikan nilai default yang spesifik untuk System Prompt
+  const [systemPrompt, setSystemPrompt] = useState(
+    'You are an expert prompt engineer for AI image generators. Your task is to take the user\'s simple input and expand it into a rich, detailed, and descriptive prompt. Do not ask questions. Do not explain your process. Only output the final, enhanced prompt as a single paragraph of comma-separated keywords and phrases.'
+  );
+
   const [prompt, setPrompt] = useState('');
   const [details, setDetails] = useState('');
-  const [systemPrompt, setSystemPrompt] = useState('');
   const [model, setModel] = useState('openai');
   const [temperature, setTemperature] = useState(0.7);
   const [seed, setSeed] = useState<number | ''>('');
   const [topP, setTopP] = useState(1.0);
   const [freqPenalty, setFreqPenalty] = useState(0.0);
   
-  // State untuk UI
   const [availableModels, setAvailableModels] = useState<AIModel[]>([]);
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [result, setResult] = useState('');
@@ -152,21 +152,21 @@ export default function AdvancedGenerator() {
             <label htmlFor="systemPrompt" className={styles.label}>
               <Settings size={16}/> System Prompt (Peran AI)
             </label>
-            <textarea id="systemPrompt" value={systemPrompt} onChange={(e) => setSystemPrompt(e.target.value)} placeholder="Contoh: Anda adalah seorang penulis cerita fiksi ilmiah yang puitis." rows={2} className={styles.textarea} />
+            <textarea id="systemPrompt" value={systemPrompt} onChange={(e) => setSystemPrompt(e.target.value)} placeholder="Contoh: Anda adalah seorang penulis cerita fiksi ilmiah yang puitis." rows={4} className={styles.textarea} />
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="prompt" className={styles.label}>
               <Pilcrow size={16}/> Prompt Utama
             </label>
-            <textarea id="prompt" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Tulis sebuah deskripsi tentang planet asing..." rows={4} className={styles.textarea} required />
+            <textarea id="prompt" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Contoh: kucing astronot" rows={2} className={styles.textarea} required />
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="details" className={styles.label}>
               <Bot size={16}/> Detail Tambahan
             </label>
-            <textarea id="details" value={details} onChange={(e) => setDetails(e.target.value)} placeholder="Planet tersebut memiliki dua matahari dan vegetasi berwarna biru." rows={3} className={styles.textarea} />
+            <textarea id="details" value={details} onChange={(e) => setDetails(e.target.value)} placeholder="Contoh: memakai helm kaca, mengambang di luar angkasa" rows={2} className={styles.textarea} />
           </div>
           
           <details className={styles.advancedSettings}>
@@ -180,13 +180,9 @@ export default function AdvancedGenerator() {
               <div className={styles.select}>
                 <label htmlFor="model" className={styles.label}>Model</label>
                 <select id="model" value={model} onChange={(e) => setModel(e.target.value)} className={styles.select} disabled={!modelsLoaded}>
-                  {!modelsLoaded ? (
-                    <option>Memuat model...</option>
-                  ) : availableModels.length > 0 ? (
-                    availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)
-                  ) : (
-                    <option value="openai">OpenAI (Default)</option>
-                  )}
+                  {!modelsLoaded ? ( <option>Memuat model...</option> ) 
+                  : availableModels.length > 0 ? ( availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>) ) 
+                  : ( <option value="openai">OpenAI (Default)</option> )}
                 </select>
               </div>
               <div className={styles.formGroup}>
@@ -223,12 +219,8 @@ export default function AdvancedGenerator() {
         {(error || result) && (
           <div className={styles.resultCard}>
             <h2 className={styles.resultHeader}><Bot size={24}/> AI Generated Text</h2>
-            {error ? (
-              <p style={{color: "var(--error-color)"}}><strong>Error:</strong> {error}
-              </p>
-            ) : (
-              <div className={`${styles.resultText} ${isLoading ? '' : styles.done}`}>{result}</div>
-            )}
+            {error ? ( <p style={{color: "var(--error-color)"}}><strong>Error:</strong> {error}</p> ) 
+            : ( <div className={`${styles.resultText} ${isLoading ? '' : styles.done}`}>{result}</div> )}
             {result && !isLoading && (
               <button onClick={handleCopy} className={`${styles.button} ${styles.copyButton} ${isCopied ? styles.copied : ''}`}>
                 {isCopied ? <Check size={20} /> : <Copy size={20} />}
