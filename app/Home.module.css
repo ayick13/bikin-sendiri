@@ -1,25 +1,4 @@
 /* app/Home.module.css */
-:root {
-  --background-color: #f0f2f5;
-  --card-background-color: #ffffff;
-  --text-primary-color: #111827;
-  --text-secondary-color: #4b5563;
-  --border-color: #e5e7eb;
-  --primary-color: #3b82f6;
-  --primary-hover-color: #2563eb;
-  --input-background-color: #f9fafb;
-}
-
-.dark {
-  --background-color: #111827;
-  --card-background-color: #1f2937;
-  --text-primary-color: #f9fafb;
-  --text-secondary-color: #9ca3af;
-  --border-color: #374151;
-  --primary-color: #60a5fa;
-  --primary-hover-color: #3b82f6;
-  --input-background-color: #374151;
-}
 
 .container {
   min-height: 100vh;
@@ -27,9 +6,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: var(--background-color);
-  color: var(--text-primary-color);
-  transition: background-color 0.3s, color 0.3s;
 }
 
 .header {
