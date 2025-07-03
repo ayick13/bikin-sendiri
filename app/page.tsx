@@ -1,39 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// Pastikan nama file CSS ini sudah benar sesuai file Anda (misal: Home.module.css)
 import styles from './Home.module.css'; 
 import { Wand2, Copy, Check, Moon, Sun, LoaderCircle, Bot, Pilcrow } from 'lucide-react';
 
-// Definisikan tipe untuk model yang kita fetch
 type AIModel = {
   id: string;
   name: string;
 };
 
 export default function AdvancedGenerator() {
-  // State untuk form inputs
   const [prompt, setPrompt] = useState('');
   const [details, setDetails] = useState('');
   const [model, setModel] = useState('openai');
   const [temperature, setTemperature] = useState(0.7);
   const [availableModels, setAvailableModels] = useState<AIModel[]>([]);
 
-  // State untuk hasil dan UI
   const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   
-  // Efek untuk mengambil daftar model saat komponen pertama kali dimuat
   useEffect(() => {
     const fetchModels = async () => {
       try {
         const response = await fetch('/api/get-models');
-        if (!response.ok) {
-          throw new Error('Failed to load models');
-        }
+        if (!response.ok) throw new Error('Failed to load models');
         const models = await response.json();
         setAvailableModels(models);
         if (models.length > 0) {
@@ -46,12 +39,16 @@ export default function AdvancedGenerator() {
     fetchModels();
   }, []);
 
-  // Efek untuk mengubah tema pada body
+  // --- PERUBAHAN UTAMA DI SINI ---
+  // Menggunakan classList untuk menambah/menghapus kelas 'dark' global pada body
   useEffect(() => {
-    document.body.className = isDarkMode ? styles.dark : '';
+    if (isDarkMode) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
   }, [isDarkMode]);
 
-  // Fungsi untuk menangani streaming response
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading) return;
@@ -80,9 +77,7 @@ export default function AdvancedGenerator() {
       }
 
       const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error("Failed to read response body.");
-      }
+      if (!reader) throw new Error("Failed to read response body.");
       const decoder = new TextDecoder();
 
       while (true) {
@@ -109,7 +104,9 @@ export default function AdvancedGenerator() {
   };
 
   return (
-    <div className={`${styles.container} ${isDarkMode ? styles.dark : ''}`}>
+    // --- DAN PERUBAHAN KEDUA DI SINI ---
+    // Menerapkan kelas 'dark' global, bukan 'styles.dark'
+    <div className={`${styles.container} ${isDarkMode ? 'dark' : ''}`}>
       <main className={styles.main}>
         <div className={styles.header}>
           <h1 className={styles.title}>
