@@ -476,3 +476,118 @@
     opacity: 0.5; /* Secara visual membuat form terlihat redup */
     pointer-events: none; /* Mencegah interaksi dengan elemen di bawahnya */
 }
+/* Gaya untuk Tombol Lebar di dalam Modal */
+.authButtonWide {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--input-background-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary-color);
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 1rem;
+}
+
+.authButtonWide:hover:not(:disabled) {
+  background-color: var(--border-color);
+}
+
+.authButtonWide:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* === Gaya untuk Dialog / Modal === */
+.dialogOverlay {
+  background-color: rgba(0, 0, 0, 0.6);
+  position: fixed;
+  inset: 0;
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 20;
+}
+
+.dialogContent {
+  background-color: var(--card-background-color);
+  border-radius: 12px;
+  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  max-width: 450px;
+  max-height: 85vh;
+  padding: 2rem;
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 21;
+}
+.dialogContent:focus {
+  outline: none;
+}
+
+.dialogTitle {
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+  color: var(--text-primary-color);
+  font-size: 1.5rem;
+}
+
+.dialogDescription {
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary-color);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.dialogAuthOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dialogCloseButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text-secondary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s;
+}
+.dialogCloseButton:hover {
+    background-color: var(--input-background-color);
+    color: var(--text-primary-color);
+}
+
+@keyframes overlayShow {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+/* Gaya untuk ikon di dalam tombol login modal */
+.authIcon {
+  width: 20px;
+  height: 20px;
+}

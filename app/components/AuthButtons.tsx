@@ -3,19 +3,22 @@
 
 import { useState } from 'react';
 import { useSession, signIn, signOut } from "next-auth/react";
+import * as Dialog from '@radix-ui/react-dialog';
 import styles from '../Home.module.css';
-import { LogIn, LogOut, LoaderCircle } from "lucide-react"; // Import LoaderCircle
-import Image from "next/image";
+import { LogIn, LogOut, LoaderCircle, X, Github } from "lucide-react"; 
+import Image from "next/image"; // 1. Import komponen Image dari Next.js
 
 export default function AuthButtons() {
     const { data: session, status } = useSession();
-    const [isSigningIn, setIsSigningIn] = useState(false); // State baru untuk menangani loading awal
+    const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
 
-    // Tentukan apakah tombol harus dinonaktifkan
-    const isDisabled = status === "loading" || isSigningIn;
+    const handleSignIn = async (provider: 'google' | 'github') => {
+        setLoadingProvider(provider);
+        await signIn(provider, { callbackUrl: '/' });
+    };
 
-    if (status === "loading") { // Biarkan div loading default untuk status NextAuth loading
-        return <div className={styles.authLoading}></div>;
+    if (status === "loading") {
+        return <div className={styles.authLoading} style={{ width: '90px' }}></div>;
     }
 
     if (session) {
@@ -30,7 +33,7 @@ export default function AuthButtons() {
                         className={styles.avatar}
                     />
                 )}
-                <button onClick={() => signOut()} className={styles.authButton}>
+                <button onClick={() => signOut({ callbackUrl: '/' })} className={styles.authButton}>
                     <LogOut size={16} />
                     Sign Out
                 </button>
@@ -38,18 +41,57 @@ export default function AuthButtons() {
         );
     }
 
-    // Fungsi untuk menangani klik Sign In
-    const handleSignIn = async () => {
-        setIsSigningIn(true); // Langsung set loading true saat diklik
-        await signIn('google');
-        // setIsSigningIn(false) mungkin tidak akan pernah tercapai jika signIn memicu redirect penuh
-        // Namun, browser akan menangani redirect dan state ini akan direset pada pemuatan halaman baru.
-    };
-
     return (
-        <button onClick={handleSignIn} className={styles.authButton} disabled={isDisabled}>
-            {isDisabled ? <LoaderCircle size={16} className={styles.loadingIcon} /> : <LogIn size={16} />}
-            <span>{isDisabled ? 'Signing In...' : 'Sign In'}</span>
-        </button>
+        <Dialog.Root>
+            <Dialog.Trigger asChild>
+                <button className={styles.authButton}>
+                    <LogIn size={16} />
+                    <span>Login</span>
+                </button>
+            </Dialog.Trigger>
+            <Dialog.Portal>
+                <Dialog.Overlay className={styles.dialogOverlay} />
+                <Dialog.Content className={styles.dialogContent}>
+                    <Dialog.Title className={styles.dialogTitle}>Login ke Prompt Studio</Dialog.Title>
+                    <Dialog.Description className={styles.dialogDescription}>
+                        Pilih provider pilihan Anda untuk melanjutkan.
+                    </Dialog.Description>
+                    
+                    <div className={styles.dialogAuthOptions}>
+                        <button
+                            onClick={() => handleSignIn('google')}
+                            className={styles.authButtonWide}
+                            disabled={!!loadingProvider}
+                        >
+                            {/* 2. Gunakan komponen Image untuk memuat SVG dari folder public */}
+                            {loadingProvider === 'google' ? <LoaderCircle size={20} className={styles.loadingIcon} /> : (
+                                <Image
+                                    src="/google-icon.svg"
+                                    alt="Google Icon"
+                                    width={20}
+                                    height={20}
+                                    className={styles.authIcon}
+                                />
+                            )}
+                            <span>{loadingProvider === 'google' ? 'Mengarahkan...' : 'Lanjutkan dengan Google'}</span>
+                        </button>
+                        <button
+                            onClick={() => handleSignIn('github')}
+                            className={styles.authButtonWide}
+                            disabled={!!loadingProvider}
+                        >
+                            {loadingProvider === 'github' ? <LoaderCircle size={20} className={styles.loadingIcon} /> : <Github className={styles.authIcon} />}
+                            <span>{loadingProvider === 'github' ? 'Mengarahkan...' : 'Lanjutkan dengan GitHub'}</span>
+                        </button>
+                    </div>
+
+                    <Dialog.Close asChild>
+                        <button className={styles.dialogCloseButton} aria-label="Close">
+                            <X size={20} />
+                        </button>
+                    </Dialog.Close>
+                </Dialog.Content>
+            </Dialog.Portal>
+        </Dialog.Root>
     );
 }
