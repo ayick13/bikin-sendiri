@@ -29,7 +29,7 @@ export default function ImageGenerator() {
   const [prompt, setPrompt] = useState('A beautiful sunset over the ocean');
   const [negativePrompt, setNegativePrompt] = useState('');
   const [model, setModel] = useState('flux');
-  const [seed, setSeed] = useState<number | ''>(() => Math.floor(Math.random() * 100000));
+  const [seed, setSeed] = useState<number | ''>(''); // Default seed kosong agar selalu generate baru
   const [width, setWidth] = useState(1024);
   const [height, setHeight] = useState(1024);
   const [isPrivate, setIsPrivate] = useState(false);
@@ -99,8 +99,8 @@ export default function ImageGenerator() {
           if (!response.ok) throw new Error('Gagal menyempurnakan prompt.');
           const reader = response.body?.getReader();
           if (!reader) throw new Error("Gagal membaca stream.");
-          const decoder = new TextDecoder();
           setPrompt(''); 
+          const decoder = new TextDecoder();
           while (true) {
               const { value, done } = await reader.read();
               if (done) break;
@@ -128,14 +128,18 @@ export default function ImageGenerator() {
       }
   };
 
-  const generateImage = async (newSeed?: number) => {
+  const generateImage = async (options: { forceNewSeed: boolean } = { forceNewSeed: false }) => {
     if (!isLoggedIn || isLoading) return;
     setIsLoading(true);
     setImageUrl('');
     setError('');
     const loadingToast = toast.loading('AI sedang menggambar...');
-    const currentSeed = newSeed || seed || Math.floor(Math.random() * 1000000);
-    if(newSeed) { setSeed(newSeed); } else if (!seed) { setSeed(currentSeed); }
+    
+    const currentSeed = options.forceNewSeed || !seed 
+        ? Math.floor(Math.random() * 1000000) 
+        : seed;
+    
+    setSeed(currentSeed);
     
     const fullPrompt = negativePrompt ? `${prompt} --neg ${negativePrompt}` : prompt;
     const params = new URLSearchParams({
@@ -182,9 +186,21 @@ export default function ImageGenerator() {
     }
   };
   
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => { e.preventDefault(); generateImage(); };
-  const handleVariations = () => { generateImage(Math.floor(Math.random() * 1000000)); };
-  const handleCopyPrompt = () => { navigator.clipboard.writeText(prompt); toast.success('Prompt disalin ke clipboard!'); };
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      generateImage({ forceNewSeed: !seed });
+  };
+
+  const handleVariations = () => {
+    toast('Membuat variasi dengan seed baru...', { icon: '🎨' });
+    generateImage({ forceNewSeed: true });
+  };
+  
+  const handleCopyPrompt = () => {
+      navigator.clipboard.writeText(prompt);
+      toast.success('Prompt disalin ke clipboard!');
+  };
+  
   const handleDownload = () => {
     if (!imageUrl) return;
     const link = document.createElement('a');
@@ -195,9 +211,25 @@ export default function ImageGenerator() {
     document.body.removeChild(link);
     toast.success('Gambar diunduh!');
   };
-  const generateRandomSeed = () => { const newSeed = Math.floor(Math.random() * 1000000); setSeed(newSeed); toast(`Seed baru: ${newSeed}`); };
-  const setPresetSize = (pWidth: number, pHeight: number) => { setWidth(pWidth); setHeight(pHeight); toast(`Ukuran diatur ke: ${pWidth}x${pHeight}`); };
-  const viewHistoryImage = (item: HistoryItem) => { setImageUrl(item.imageUrl); setPrompt(item.prompt); setSeed(item.seed); toast('Memuat gambar dari riwayat.'); };
+
+  const generateRandomSeed = () => {
+    const newSeed = Math.floor(Math.random() * 1000000);
+    setSeed(newSeed);
+    toast(`Seed baru: ${newSeed}`);
+  };
+
+  const setPresetSize = (pWidth: number, pHeight: number) => {
+      setWidth(pWidth);
+      setHeight(pHeight);
+      toast(`Ukuran diatur ke: ${pWidth}x${pHeight}`);
+  };
+
+  const viewHistoryImage = (item: HistoryItem) => {
+      setImageUrl(item.imageUrl);
+      setPrompt(item.prompt);
+      setSeed(item.seed);
+      toast('Memuat gambar dari riwayat.');
+  };
 
   return (
     <>

@@ -26,7 +26,7 @@ export default function HomePage() {
       <main className={styles.main}>
         <div className={styles.header}>
           <h1 className={styles.title}>
-            Prompt <span>Studio</span>
+            Prompt <span>Studio</span>+
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <AuthButtons />
