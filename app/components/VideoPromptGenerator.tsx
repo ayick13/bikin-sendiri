@@ -3,12 +3,11 @@
 
 import { useState } from 'react';
 import styles from '../Home.module.css';
-// Tambahkan 'Lock' ke daftar impor ikon
-import { Film, Clapperboard, Camera, Palette, Sparkles, Wand2, Copy, Check, Sun, Wind, Aperture, Brush, Lock } from 'lucide-react';
+import { Film, Clapperboard, Camera, Palette, Sparkles, Wand2, Copy, Check, Sun, Aperture, Brush, Lock, LoaderCircle, Bot } from 'lucide-react';
 import CustomSelect from './CustomSelect';
-import { useSession } from 'next-auth/react'; // Import useSession
+import { useSession } from 'next-auth/react';
 
-// Opsi untuk CustomSelect
+// Opsi untuk CustomSelect tetap sama
 const moodOptions = [
   { value: 'Cinematic', label: 'Cinematic' },
   { value: 'Epic', label: 'Epic' },
@@ -66,14 +65,10 @@ const lensOptions = [
 ];
 
 export default function VideoPromptGenerator() {
-    // Ambil data sesi dari NextAuth
-    const { data: session, status } = useSession();
-    // Tentukan apakah pengguna sudah login
+    const { data: session } = useSession();
     const isLoggedIn = !!session?.user;
 
-    const [result, setResult] = useState('');
-    const [isCopied, setIsCopied] = useState(false);
-
+    // State untuk input form
     const [subject, setSubject] = useState('a majestic eagle');
     const [action, setAction] = useState('soaring through a thunderstorm');
     const [mood, setMood] = useState('Cinematic');
@@ -88,28 +83,67 @@ export default function VideoPromptGenerator() {
     const [lighting, setLighting] = useState('dramatic backlighting from the clouds');
     const [quality, setQuality] = useState('4K, photorealistic, high detail, sharp focus');
 
-    const generateVideoPrompt = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        // Hanya lanjutkan jika pengguna sudah login
-        if (!isLoggedIn) return;
+    // State untuk hasil, loading, error, dan copy
+    const [result, setResult] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [isCopied, setIsCopied] = useState(false);
 
-        const promptParts = [
-            subject,
-            action,
-            artisticStyle,
-            `${mood} atmosphere`,
-            `${style} style`,
-            color,
-            timeAndWeather,
-            `cinematography by ${camera}, ${cameraMovement}`,
-            `shot on ${lens} lens`,
-            lighting,
-            filmEffects,
-            quality,
-        ];
-        const fullPrompt = promptParts.filter(part => part && part.trim() !== '').join(', ');
-        setResult(fullPrompt);
+    const generateVideoPrompt = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!isLoggedIn || isLoading) return;
+
+        setIsLoading(true);
+        setResult('');
+        setError('');
         setIsCopied(false);
+
+        try {
+            const response = await fetch('/api/generate-video', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subject, action, mood, style, color, artisticStyle,
+                    timeAndWeather, filmEffects, camera, cameraMovement,
+                    lens, lighting, quality
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Server responded with status ${response.status}`);
+            }
+
+            const reader = response.body?.getReader();
+            if (!reader) throw new Error("Failed to read response body.");
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value);
+                // Proses streaming data seperti di text generator
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const jsonString = line.substring(6);
+                        if (jsonString.trim() === '[DONE]') { setIsLoading(false); return; };
+                        try {
+                            const parsed = JSON.parse(jsonString);
+                            const textChunk = parsed.choices?.[0]?.delta?.content;
+                            if (textChunk) {
+                                setResult((prev) => prev + textChunk);
+                            }
+                        } catch (e) { /* Abaikan chunk tidak valid */ }
+                    }
+                }
+            }
+
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleCopy = () => {
@@ -130,7 +164,7 @@ export default function VideoPromptGenerator() {
                         <p>Login untuk mengakses fitur Generator Video ini.</p>
                     </div>
                 )}
-                <fieldset className={!isLoggedIn ? styles.fieldsetDisabled : ''} disabled={!isLoggedIn}>
+                <fieldset className={!isLoggedIn ? styles.fieldsetDisabled : ''} disabled={!isLoggedIn || isLoading}>
                     <div className={styles.formGroup}>
                         <label className={styles.label} htmlFor="subject"><Clapperboard size={16}/> Basic Setting</label>
                         <input id="subject" type="text" value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subjek utama..." className={styles.input} autoFocus={isLoggedIn} required />
@@ -152,11 +186,11 @@ export default function VideoPromptGenerator() {
                         <label className={styles.label}><Brush size={16}/> Artistic & Environment</label>
                         <div className={styles.controlsGrid}>
                             <div>
-                                <label htmlFor="timeAndWeather" className={styles.label}><Sun size={14}/> Waktu & Cuaca</label>
+                                <label className={styles.label}><Sun size={14}/> Waktu & Cuaca</label>
                                 <CustomSelect options={timeAndWeatherOptions} value={timeAndWeather} onValueChange={setTimeAndWeather} placeholder="Pilih Waktu/Cuaca" />
                             </div>
                             <div>
-                                <label htmlFor="artisticStyle" className={styles.label}><Aperture size={14}/> Gaya Artistik</label>
+                                <label className={styles.label}><Aperture size={14}/> Gaya Artistik</label>
                                 <input id="artisticStyle" type="text" value={artisticStyle} onChange={e => setArtisticStyle(e.target.value)} placeholder="In the style of..." className={styles.input} />
                             </div>
                         </div>
@@ -173,7 +207,7 @@ export default function VideoPromptGenerator() {
                             <input id="lighting" type="text" value={lighting} onChange={e => setLighting(e.target.value)} placeholder="Pencahayaan..." className={styles.input} />
                         </div>
                     </div>
-
+                    
                     <div className={styles.formGroup}>
                         <label className={styles.label}><Sparkles size={16}/> Effects & Quality</label>
                         <div className={styles.controlsGrid}>
@@ -182,17 +216,23 @@ export default function VideoPromptGenerator() {
                         </div>
                     </div>
 
-                    <button type="submit" className={styles.button}><Wand2 size={22} /><span>Generate Prompt</span></button>
+                    <button type="submit" className={styles.button} disabled={isLoading || !isLoggedIn}>
+                        {isLoading ? <LoaderCircle size={22} className={styles.loadingIcon} /> : <Wand2 size={22} />}
+                        <span>{isLoading ? 'Generating...' : 'Generate with AI'}</span>
+                    </button>
                 </fieldset>
             </form>
-            {result && (
+            {(error || result) && (
                 <div className={styles.resultCard}>
-                    <h2 className={styles.resultHeader}><Film size={24}/> Video Prompt Result</h2>
-                    <div className={styles.resultText}>{result}</div>
-                    <button onClick={handleCopy} className={`${styles.button} ${styles.copyButton} ${isCopied ? styles.copied : ''}`}>
-                        {isCopied ? <Check size={20} /> : <Copy size={20} />}
-                        <span>{isCopied ? 'Copied!' : 'Copy to Clipboard'}</span>
-                    </button>
+                    <h2 className={styles.resultHeader}><Bot size={24}/> AI Generated Video Prompt</h2>
+                    {error ? ( <p style={{color: "var(--error-color)"}}><strong>Error:</strong> {error}</p> ) 
+                    : ( <div className={`${styles.resultText} ${isLoading ? '' : styles.done}`}>{result}</div> )}
+                    {result && !isLoading && (
+                        <button onClick={handleCopy} className={`${styles.button} ${styles.copyButton} ${isCopied ? styles.copied : ''}`}>
+                            {isCopied ? <Check size={20} /> : <Copy size={20} />}
+                            <span>{isCopied ? 'Copied!' : 'Copy to Clipboard'}</span>
+                        </button>
+                    )}
                 </div>
             )}
         </>

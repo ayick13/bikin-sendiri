@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   
   // URL dasar untuk semua metadata URL absolut
   // Ganti dengan domain Anda jika sudah berbeda
-  metadataBase: new URL('https://bikin-sendiri.my.id'),
+  metadataBase: new URL('https://bikinsendiri.my.id'),
 
   // Keywords untuk SEO
   keywords: ['prompt generator', 'ai prompt', 'prompt engineering', 'text prompt', 'video prompt', 'AI tools', 'pollinations.ai', 'Gresik'],
@@ -25,11 +25,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Prompt Studio Pro - AI Text & Video Prompt Creator',
     description: 'Alat canggih untuk membuat prompt AI untuk teks dan video.',
-    url: 'https://bikin-sendiri.my.id', // Ganti dengan domain Anda
+    url: 'https://bikinsendiri.my.id', // Ganti dengan domain Anda
     siteName: 'Prompt Studio Pro',
     images: [
       {
-        url: '/og-image.png', // Path ke gambar di folder `public`
+        url: '/og-image.webp', // Path ke gambar di folder `public`
         width: 1200,
         height: 630,
         alt: 'Tampilan aplikasi Prompt Studio Pro',
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Prompt Studio Pro - AI Text & Video Prompt Creator',
     description: 'Dari ide sederhana menjadi prompt AI yang detail untuk teks dan video.',
-    images: ['/og-image.png'], // Path ke gambar
+    images: ['/og-image.webp'], // Path ke gambar
   },
   
   // Aturan untuk robot search engine
