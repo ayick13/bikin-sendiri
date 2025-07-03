@@ -16,19 +16,17 @@ export async function GET() {
       }
     });
 
-    // --- BLOK YANG DIPERBARUI UNTUK LOGGING LEBIH BAIK ---
     if (!response.ok) {
-      const errorBody = await response.text(); // Ambil pesan error mentah dari Pollinations
-      console.error(`Pollinations API Error: Status ${response.status} - Body: ${errorBody}`); // Catat error ini ke log Vercel
+      const errorBody = await response.text();
+      console.error(`Pollinations API Error: Status ${response.status} - Body: ${errorBody}`);
       throw new Error(`Failed to fetch models from Pollinations API. Status: ${response.status}`);
     }
 
     const modelsData = await response.json();
     
+    // Logika filter yang lebih fleksibel, hanya berdasarkan status 'active'
     const activeModels = Object.entries(modelsData)
-      .filter(([key, value]: [string, any]) => 
-        value.active === true && value.type === 'openai-like'
-      )
+      .filter(([key, value]: [string, any]) => value.active === true)
       .map(([key, value]: [string, any]) => ({
         id: key,
         name: value.name || key,
