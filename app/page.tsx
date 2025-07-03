@@ -10,7 +10,7 @@ export default function AdvancedGenerator() {
   // --- PERUBAHAN UTAMA DI SINI ---
   // Kita berikan nilai default yang spesifik untuk System Prompt
   const [systemPrompt, setSystemPrompt] = useState(
-    'You are an expert prompt engineer for AI image generators. Your task is to take the user\'s simple input and expand it into a rich, detailed, and descriptive prompt. Do not ask questions. Do not explain your process. Only output the final, enhanced prompt as a single paragraph of comma-separated keywords and phrases.'
+    'Anda adalah seorang ahli dalam perancangan cepat untuk generator gambar AI.'
   );
 
   const [prompt, setPrompt] = useState('');
