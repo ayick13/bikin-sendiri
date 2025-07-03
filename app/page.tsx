@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// Pastikan nama file CSS ini sudah benar (misal: Home.module.css)
 import styles from './Home.module.css'; 
-import { Wand2, Copy, Check, Moon, Sun, LoaderCircle, Bot, Pilcrow } from 'lucide-react';
+import { Wand2, Copy, Check, Moon, Sun, LoaderCircle, Bot, Pilcrow, SlidersHorizontal, ChevronDown, Dices, Settings } from 'lucide-react';
 
 type AIModel = {
   id: string;
@@ -11,11 +10,17 @@ type AIModel = {
 };
 
 export default function AdvancedGenerator() {
+  // State untuk form inputs
   const [prompt, setPrompt] = useState('');
   const [details, setDetails] = useState('');
-  const [model, setModel] = useState('openai'); // Model default sebagai fallback
+  const [systemPrompt, setSystemPrompt] = useState('');
+  const [model, setModel] = useState('openai');
   const [temperature, setTemperature] = useState(0.7);
+  const [seed, setSeed] = useState<number | ''>('');
+  const [topP, setTopP] = useState(1.0);
+  const [freqPenalty, setFreqPenalty] = useState(0.0);
   
+  // State untuk UI
   const [availableModels, setAvailableModels] = useState<AIModel[]>([]);
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [result, setResult] = useState('');
@@ -30,7 +35,6 @@ export default function AdvancedGenerator() {
         const response = await fetch('/api/get-models');
         if (!response.ok) throw new Error('Failed to load models');
         const models = await response.json();
-        
         if (models && models.length > 0) {
             setAvailableModels(models);
             setModel(models[0].id);
@@ -67,7 +71,15 @@ export default function AdvancedGenerator() {
       const response = await fetch('/api/generate-text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: combinedPrompt, model, temperature }),
+        body: JSON.stringify({ 
+            prompt: combinedPrompt, 
+            model, 
+            temperature,
+            system: systemPrompt,
+            seed,
+            top_p: topP,
+            frequency_penalty: freqPenalty
+        }),
       });
 
       if (!response.ok) {
@@ -92,7 +104,7 @@ export default function AdvancedGenerator() {
           if (line.startsWith('data: ')) {
             const jsonString = line.substring(6);
             if (jsonString.trim() === '[DONE]') {
-              setIsLoading(false); // Pastikan loading berhenti saat stream selesai
+              setIsLoading(false);
               return;
             };
             try {
@@ -120,53 +132,87 @@ export default function AdvancedGenerator() {
       });
     }
   };
+  
+  const generateRandomSeed = () => {
+    setSeed(Math.floor(Math.random() * 1000000));
+  }
 
   return (
     <div className={`${styles.container} ${isDarkMode ? 'dark' : ''}`}>
       <main className={styles.main}>
         <div className={styles.header}>
-          <h1 className={styles.title}>AI Text <span>Pro</span></h1>
-          <label className={styles.toggleSwitch}>
-            <input type="checkbox" checked={isDarkMode} onChange={() => setIsDarkMode(!isDarkMode)} />
-            <span className={styles.toggleSlider}>
-              {isDarkMode ? <Moon size={16} style={{margin: 'auto', color: '#1f2937'}}/> : <Sun size={16} style={{margin: 'auto', color: 'white'}}/>}
-            </span>
-          </label>
+          <h1 className={styles.title}>AI Text <span>Pro+</span></h1>
+          <button onClick={() => setIsDarkMode(!isDarkMode)} className={styles.themeToggleButton} aria-label="Toggle dark mode">
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
-            <label htmlFor="prompt" className={styles.label}>
-              <Pilcrow size={16} style={{ display: 'inline-block', marginRight: '0.5rem' }}/> Prompt Utama
+            <label htmlFor="systemPrompt" className={styles.label}>
+              <Settings size={16}/> System Prompt (Peran AI)
             </label>
-            <textarea id="prompt" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Contoh: Tulis sebuah cerita pendek..." rows={5} className={styles.textarea} required />
+            <textarea id="systemPrompt" value={systemPrompt} onChange={(e) => setSystemPrompt(e.target.value)} placeholder="Contoh: Anda adalah seorang penulis cerita fiksi ilmiah yang puitis." rows={2} className={styles.textarea} />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="prompt" className={styles.label}>
+              <Pilcrow size={16}/> Prompt Utama
+            </label>
+            <textarea id="prompt" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Tulis sebuah deskripsi tentang planet asing..." rows={4} className={styles.textarea} required />
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="details" className={styles.label}>
-              <Bot size={16} style={{ display: 'inline-block', marginRight: '0.5rem' }}/> Detail Tambahan
+              <Bot size={16}/> Detail Tambahan
             </label>
-            <textarea id="details" value={details} onChange={(e) => setDetails(e.target.value)} placeholder="Gaya penulisan lucu, sebutkan kucing bernama 'Oyen'." rows={3} className={styles.textarea} />
+            <textarea id="details" value={details} onChange={(e) => setDetails(e.target.value)} placeholder="Planet tersebut memiliki dua matahari dan vegetasi berwarna biru." rows={3} className={styles.textarea} />
           </div>
+          
+          <details className={styles.advancedSettings}>
+            <summary>
+              <SlidersHorizontal size={16}/>
+              Pengaturan Lanjutan
+              <ChevronDown size={20} />
+            </summary>
+            
+            <div className={styles.controlsGrid}>
+              <div className={styles.select}>
+                <label htmlFor="model" className={styles.label}>Model</label>
+                <select id="model" value={model} onChange={(e) => setModel(e.target.value)} className={styles.select} disabled={!modelsLoaded}>
+                  {!modelsLoaded ? (
+                    <option>Memuat model...</option>
+                  ) : availableModels.length > 0 ? (
+                    availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)
+                  ) : (
+                    <option value="openai">OpenAI (Default)</option>
+                  )}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="seed" className={styles.label}>Seed</label>
+                <div className={styles.seedContainer}>
+                    <input id="seed" type="number" value={seed} onChange={(e) => setSeed(e.target.value ? parseInt(e.target.value) : '')} placeholder="Angka acak" className={styles.input}/>
+                    <button type="button" onClick={generateRandomSeed} aria-label="Generate random seed"><Dices size={18}/></button>
+                </div>
+              </div>
+            </div>
 
-          <div className={styles.controlsGrid}>
-            <div className={styles.select}>
-              <label htmlFor="model" className={styles.label}>Model</label>
-              <select id="model" value={model} onChange={(e) => setModel(e.target.value)} className={styles.select} disabled={!modelsLoaded}>
-                {!modelsLoaded ? (
-                  <option>Memuat model...</option>
-                ) : availableModels.length > 0 ? (
-                  availableModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)
-                ) : (
-                  <option value="openai">OpenAI (Default)</option>
-                )}
-              </select>
+            <div className={styles.controlsGrid}>
+                <div className={styles.sliderContainer}>
+                  <label htmlFor="temperature" className={styles.label}>Temperature: {temperature}</label>
+                  <input id="temperature" type="range" min="0" max="2" step="0.1" value={temperature} onChange={(e) => setTemperature(parseFloat(e.target.value))} className={styles.slider}/>
+                </div>
+                <div className={styles.sliderContainer}>
+                  <label htmlFor="topP" className={styles.label}>Top P: {topP}</label>
+                  <input id="topP" type="range" min="0" max="1" step="0.05" value={topP} onChange={(e) => setTopP(parseFloat(e.target.value))} className={styles.slider}/>
+                </div>
             </div>
-            <div className={styles.sliderContainer}>
-              <label htmlFor="temperature" className={styles.label}>Temperature: {temperature}</label>
-              <input id="temperature" type="range" min="0" max="2" step="0.1" value={temperature} onChange={(e) => setTemperature(parseFloat(e.target.value))} className={styles.slider}/>
+            <div className={styles.formGroup}>
+                <label htmlFor="freqPenalty" className={styles.label}>Frequency Penalty: {freqPenalty}</label>
+                <input id="freqPenalty" type="range" min="-2.0" max="2.0" step="0.1" value={freqPenalty} onChange={(e) => setFreqPenalty(parseFloat(e.target.value))} className={styles.slider}/>
             </div>
-          </div>
+          </details>
           
           <button type="submit" disabled={isLoading} className={styles.button}>
             {isLoading ? <LoaderCircle size={22} className={styles.loadingIcon} /> : <Wand2 size={22} />}
@@ -178,7 +224,8 @@ export default function AdvancedGenerator() {
           <div className={styles.resultCard}>
             <h2 className={styles.resultHeader}><Bot size={24}/> AI Generated Text</h2>
             {error ? (
-              <p style={{color: "var(--error-color)"}}><strong>Error:</strong> {error}</p>
+              <p style={{color: "var(--error-color)"}}><strong>Error:</strong> {error}
+              </p>
             ) : (
               <div className={`${styles.resultText} ${isLoading ? '' : styles.done}`}>{result}</div>
             )}
