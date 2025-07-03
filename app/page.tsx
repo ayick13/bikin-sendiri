@@ -3,10 +3,10 @@
 
 import { useState, useEffect } from 'react';
 import styles from './Home.module.css';
-import { Sun, Moon, Pencil, Video, Image as ImageIcon } from 'lucide-react'; // 1. Tambahkan ikon Image
+import { Sun, Moon, Pencil, Video, Image as ImageIcon } from 'lucide-react';
 import TextPromptGenerator from './components/TextPromptGenerator';
 import VideoPromptGenerator from './components/VideoPromptGenerator';
-import ImageGenerator from './components/ImageGenerator'; // 2. Impor komponen baru
+import ImageGenerator from './components/ImageGenerator';
 import AuthButtons from './components/AuthButtons';
 
 export default function HomePage() {
@@ -36,34 +36,42 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* Kontainer tab yang sudah disatukan */}
         <div className={styles.tabContainer}>
-          <button 
-            className={`${styles.tab} ${activeTab === 'text' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('text')}
-          >
-            <Pencil size={16} />
-            Creator Prompt Teks
-          </button>
-          <button 
-            className={`${styles.tab} ${activeTab === 'video' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('video')}
-          >
-            <Video size={16} />
-            Creator Prompt Video
-          </button>
-          {/* 3. Tambahkan tombol tab baru */}
-          <button 
-            className={`${styles.tab} ${activeTab === 'image' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('image')}
-          >
-            <ImageIcon size={16} />
-            Generate Gambar
-          </button>
+          {/* Baris pertama untuk dua tab */}
+          <div className={styles.tabRow}>
+            <button 
+              className={`${styles.tab} ${activeTab === 'text' ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab('text')}
+            >
+              <Pencil size={16} />
+              Creator Prompt Teks
+            </button>
+            <button 
+              className={`${styles.tab} ${activeTab === 'video' ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab('video')}
+            >
+              <Video size={16} />
+              Creator Prompt Video
+            </button>
+          </div>
+          {/* Baris kedua untuk tab gambar */}
+          <div className={styles.tabRow}>
+              <button 
+                  className={`${styles.tab} ${activeTab === 'image' ? styles.activeTab : ''}`}
+                  onClick={() => setActiveTab('image')}
+                  style={{ width: '100%' }} // Memastikan tombol memanjang
+              >
+                  <ImageIcon size={16} />
+                  Generate Gambar
+              </button>
+          </div>
         </div>
+
+
         <div className={styles.tabContent}>
             {activeTab === 'text' && <TextPromptGenerator />}
             {activeTab === 'video' && <VideoPromptGenerator />}
-            {/* 4. Tampilkan komponen baru saat tab aktif */}
             {activeTab === 'image' && <ImageGenerator />}
         </div>
       </main>
