@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, model, temperature } = await request.json();
+    // Ambil semua parameter baru dari body request
+    const { prompt, model, temperature, system, seed, top_p, frequency_penalty } = await request.json();
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
@@ -12,15 +13,23 @@ export async function POST(request: NextRequest) {
 
     const apiToken = process.env.POLLINATIONS_API_TOKEN;
     if (!apiToken) {
-      console.error("API Token not found on Vercel");
+      console.error("Vercel Error: Environment variable POLLINATIONS_API_TOKEN not found.");
       return NextResponse.json({ error: 'Server configuration error: API token is missing.' }, { status: 500 });
     }
 
+    // Bangun parameter URL dengan lebih dinamis
     const params = new URLSearchParams({
       model: model || 'openai',
-      temperature: temperature || '0.7',
+      temperature: temperature?.toString() || '0.7',
       stream: 'true',
     });
+
+    // Tambahkan parameter hanya jika ada nilainya
+    if (system) params.append('system', system);
+    if (seed) params.append('seed', seed.toString());
+    if (top_p) params.append('top_p', top_p.toString());
+    if (frequency_penalty) params.append('frequency_penalty', frequency_penalty.toString());
+
     const url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?${params.toString()}`;
 
     const response = await fetch(url, {
@@ -29,18 +38,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Pollinations API Error:", errorText);
-      return NextResponse.json({ error: `API Error: ${errorText}` }, { status: response.status });
+      const errorBody = await response.text();
+      console.error(`Pollinations API Error: Status ${response.status} - Body: ${errorBody}`);
+      return NextResponse.json({ error: `API Error: ${errorBody}` }, { status: response.status });
     }
-
-    // --- PERUBAHAN UTAMA DI SINI ---
-    // Kita tidak perlu fungsi helper. Langsung kembalikan body dari respons Pollinations.
-    // Server modern (seperti Vercel) akan secara otomatis menyalurkan (stream) ini ke frontend.
+    
     return new Response(response.body, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-      },
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     });
 
   } catch (error: any) {
