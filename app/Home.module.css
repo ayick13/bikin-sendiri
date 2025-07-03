@@ -591,3 +591,90 @@
   width: 20px;
   height: 20px;
 }
+
+/* Gaya untuk hasil gambar */
+.imageLoadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--text-secondary-color);
+    padding: 3rem 1rem;
+    min-height: 200px;
+}
+
+.imageResultContainer {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* Gaya untuk Tombol Bersihkan */
+.clearButton {
+  background: none;
+  border: none;
+  color: var(--text-secondary-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.clearButton:hover {
+  background-color: var(--border-color);
+  color: #ef4444; /* Warna merah untuk aksi hapus */
+}
+
+
+/* Gaya untuk Kontainer Preset */
+.presetContainer {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.presetButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background-color: var(--input-background-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.presetButton:hover {
+  border-color: var(--primary-color);
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+}
+/* Gaya untuk Tombol Enhance Prompt (DIPERBARUI) */
+.enhanceButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary-color);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.enhanceButton:hover:not(:disabled) {
+  background-color: var(--border-color);
+  color: var(--primary-color);
+}
+
+.enhanceButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
