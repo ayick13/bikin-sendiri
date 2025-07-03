@@ -181,8 +181,7 @@ a {
   background-color: var(--card-background-color);
   padding: 2rem;
   border-radius: 12px;
-  /* Hapus atau setel box-shadow ke none atau 0 */
-  box-shadow: none; /* ATAU box-shadow: 0; */
+  box-shadow: none;
   transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -425,6 +424,7 @@ a {
   padding: 2rem;
   border-radius: 12px;
   background-color: var(--card-background-color);
+  box-shadow: none;
   animation: fadeIn 0.5s ease-out;
 }
 
