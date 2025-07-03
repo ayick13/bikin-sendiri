@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import styles from './Page.module.css';
-// Impor ikon dari lucide-react
+// Impor file CSS Module dengan nama baru
+import styles from './Home.module.css'; 
 import { Wand2, Copy, Check, Moon, Sun, LoaderCircle, Bot, Pilcrow } from 'lucide-react';
 
 // Definisikan tipe untuk model yang kita fetch
@@ -25,7 +25,7 @@ export default function AdvancedGenerator() {
   const [error, setError] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-
+  
   // Efek untuk mengambil daftar model saat komponen pertama kali dimuat
   useEffect(() => {
     const fetchModels = async () => {

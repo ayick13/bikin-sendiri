@@ -1,4 +1,4 @@
-/* app/Page.module.css */
+/* app/Home.module.css */
 :root {
   --background-color: #f0f2f5;
   --card-background-color: #ffffff;
@@ -242,6 +242,7 @@
   background-color: #374151;
 }
 
+/* Dark Mode Toggle Switch */
 .toggleSwitch {
   position: relative;
   display: inline-block;
