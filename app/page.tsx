@@ -1,21 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+// Pastikan nama file CSS ini sudah benar sesuai file Anda (misal: Home.module.css)
 import styles from './Home.module.css'; 
 import { Wand2, Copy, Check, Moon, Sun, LoaderCircle, Bot, Pilcrow } from 'lucide-react';
 
+// Definisikan tipe untuk model yang kita fetch
 type AIModel = {
   id: string;
   name: string;
 };
 
 export default function AdvancedGenerator() {
+  // State untuk form inputs
   const [prompt, setPrompt] = useState('');
   const [details, setDetails] = useState('');
   const [model, setModel] = useState('openai');
   const [temperature, setTemperature] = useState(0.7);
   const [availableModels, setAvailableModels] = useState<AIModel[]>([]);
 
+  // State untuk hasil dan UI
   const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -39,8 +43,6 @@ export default function AdvancedGenerator() {
     fetchModels();
   }, []);
 
-  // --- PERUBAHAN UTAMA DI SINI ---
-  // Menggunakan classList untuk menambah/menghapus kelas 'dark' global pada body
   useEffect(() => {
     if (isDarkMode) {
       document.body.classList.add('dark');
@@ -49,6 +51,7 @@ export default function AdvancedGenerator() {
     }
   }, [isDarkMode]);
 
+  // Fungsi untuk menangani streaming response
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading) return;
@@ -80,11 +83,42 @@ export default function AdvancedGenerator() {
       if (!reader) throw new Error("Failed to read response body.");
       const decoder = new TextDecoder();
 
+      // --- LOGIKA BARU UNTUK MEMPROSES STREAM ---
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
+
         const chunk = decoder.decode(value);
-        setResult((prev) => prev + chunk);
+        // Memecah data mentah menjadi baris-baris, karena satu 'chunk' bisa berisi beberapa 'data:'
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          // Hanya proses baris yang berisi data
+          if (line.startsWith('data: ')) {
+            // Hapus 'data: ' dari awal string
+            const jsonString = line.substring(6);
+            
+            // Hentikan jika menerima sinyal [DONE]
+            if (jsonString.trim() === '[DONE]') {
+              return; // Keluar dari loop dan fungsi
+            }
+            
+            try {
+              // Ubah string menjadi objek JSON
+              const parsed = JSON.parse(jsonString);
+              // Ambil konten teks dari dalam objek JSON
+              const textChunk = parsed.choices?.[0]?.delta?.content;
+
+              if (textChunk) {
+                // Tambahkan hanya potongan teks ke hasil
+                setResult((prev) => prev + textChunk);
+              }
+            } catch (e) {
+              // Abaikan jika ada baris yang tidak valid, sering terjadi di awal atau akhir stream
+              // console.error("Could not parse JSON chunk:", jsonString);
+            }
+          }
+        }
       }
 
     } catch (err: any) {
@@ -104,8 +138,6 @@ export default function AdvancedGenerator() {
   };
 
   return (
-    // --- DAN PERUBAHAN KEDUA DI SINI ---
-    // Menerapkan kelas 'dark' global, bukan 'styles.dark'
     <div className={`${styles.container} ${isDarkMode ? 'dark' : ''}`}>
       <main className={styles.main}>
         <div className={styles.header}>
