@@ -2,6 +2,7 @@
 
 import type { Metadata } from "next";
 import "./globals.css";
+import AuthProvider from "./components/AuthProvider";
 
 // Metadata Lengkap untuk SEO dan Social Sharing
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
   
   // URL dasar untuk semua metadata URL absolut
   // Ganti dengan domain Anda jika sudah berbeda
-  metadataBase: new URL('https://bikinsendiri.my.id'),
+  metadataBase: new URL('https://bikin-sendiri.my.id'),
 
   // Keywords untuk SEO
   keywords: ['prompt generator', 'ai prompt', 'prompt engineering', 'text prompt', 'video prompt', 'AI tools', 'pollinations.ai', 'Gresik'],
@@ -24,11 +25,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Prompt Studio Pro - AI Text & Video Prompt Creator',
     description: 'Alat canggih untuk membuat prompt AI untuk teks dan video.',
-    url: 'https://bikinsendiri.my.id', // Ganti dengan domain Anda
+    url: 'https://bikin-sendiri.my.id', // Ganti dengan domain Anda
     siteName: 'Prompt Studio Pro',
     images: [
       {
-        url: '/og-image.webp', // Path ke gambar di folder `public`
+        url: '/og-image.png', // Path ke gambar di folder `public`
         width: 1200,
         height: 630,
         alt: 'Tampilan aplikasi Prompt Studio Pro',
@@ -74,7 +75,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

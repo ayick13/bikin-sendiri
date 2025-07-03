@@ -5,10 +5,9 @@
 import { useState, useEffect } from 'react';
 import styles from './Home.module.css';
 import { Sun, Moon, Pencil, Video } from 'lucide-react';
-
-// Impor dua komponen generator kita
 import TextPromptGenerator from './components/TextPromptGenerator';
 import VideoPromptGenerator from './components/VideoPromptGenerator';
+import AuthButtons from './components/AuthButtons';
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState('text');
@@ -29,12 +28,14 @@ export default function HomePage() {
           <h1 className={styles.title}>
             Prompt <span >Studio</span>
           </h1>
-          <button onClick={() => setIsDarkMode(!isDarkMode)} className={styles.themeToggleButton} aria-label="Toggle dark mode">
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <AuthButtons />
+            <button onClick={() => setIsDarkMode(!isDarkMode)} className={styles.themeToggleButton} aria-label="Toggle dark mode">
+              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+          </div>
         </div>
 
-        {/* Navigasi Tab */}
         <div className={styles.tabContainer}>
           <button 
             className={`${styles.tab} ${activeTab === 'text' ? styles.activeTab : ''}`}
@@ -51,8 +52,6 @@ export default function HomePage() {
             Creator Prompt Video
           </button>
         </div>
-
-        {/* Konten yang ditampilkan berdasarkan tab aktif */}
         <div className={styles.tabContent}>
             {activeTab === 'text' && <TextPromptGenerator />}
             {activeTab === 'video' && <VideoPromptGenerator />}
