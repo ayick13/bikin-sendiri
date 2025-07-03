@@ -21,13 +21,23 @@ export async function GET() {
 
     const modelsData = await response.json();
     
-    // Kita asumsikan data yang relevan ada di dalam 'openai-like' dan kita filter yang aktif
-    const activeModels = modelsData['openai-like']?.filter((m: any) => m.active) || [];
+    // --- LOGIKA BARU YANG SUDAH DIPERBAIKI ---
+    // API mengembalikan objek, bukan array. Kita ubah objek tersebut menjadi array.
+    const activeModels = Object.entries(modelsData)
+      // value adalah objek detail model, key adalah ID model
+      .filter(([key, value]: [string, any]) => 
+        // Filter hanya model yang aktif dan bukan model untuk audio
+        value.active === true && value.type === 'openai-like'
+      )
+      .map(([key, value]: [string, any]) => ({
+        id: key,                  // Gunakan key objek sebagai ID (misal: "openai")
+        name: value.name || key,  // Gunakan nama dari data, atau ID jika nama tidak ada
+      }));
 
     return NextResponse.json(activeModels);
 
   } catch (error: any) {
-    console.error(error);
+    console.error("Error fetching models:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
