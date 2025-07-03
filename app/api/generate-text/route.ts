@@ -1,51 +1,67 @@
 // app/api/generate-text/route.ts
 
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
-export async function POST(request: Request) {
+// Fungsi untuk mengubah stream dari API Pollinations menjadi stream yang bisa dibaca client
+function iteratorToStream(iterator: any) {
+  return new ReadableStream({
+    async pull(controller) {
+      const { value, done } = await iterator.next();
+      if (done) {
+        controller.close();
+      } else {
+        controller.enqueue(value);
+      }
+    },
+  });
+}
+
+export async function POST(request: NextRequest) {
   try {
-    // 1. Ambil prompt dari request body yang dikirim oleh frontend
-    const { prompt } = await request.json();
+    // 1. Ambil prompt dan parameter baru dari request body
+    const { prompt, model, temperature } = await request.json();
 
     if (!prompt) {
-      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+      return new Response(JSON.stringify({ error: 'Prompt is required' }), { status: 400 });
     }
 
-    // 2. Ambil token API dari Vercel Environment Variables (aman)
+    // 2. Ambil token API dari Vercel Environment Variables
     const apiToken = process.env.POLLINATIONS_API_TOKEN;
-
     if (!apiToken) {
-        return NextResponse.json({ error: 'API token is not configured' }, { status: 500 });
+      return new Response(JSON.stringify({ error: 'API token is not configured' }), { status: 500 });
     }
 
-    // 3. Encode prompt agar aman untuk URL dan siapkan URL Pollinations
+    // 3. Bangun URL dengan parameter baru
     const encodedPrompt = encodeURIComponent(prompt);
-    const url = `https://text.pollinations.ai/${encodedPrompt}`;
+    const params = new URLSearchParams({
+      model: model || 'openai', // Default ke openai jika tidak dispesifikasikan
+      temperature: temperature || '0.7', // Default temperature
+      stream: 'true', // Aktifkan streaming
+    });
+    const url = `https://text.pollinations.ai/${encodedPrompt}?${params.toString()}`;
 
-    // 4. Siapkan header untuk otentikasi
-    // Sesuai dokumentasi, metode Header adalah yang direkomendasikan
+    // 4. Siapkan header otentikasi
     const headers = {
-      'Authorization': `Bearer ${apiToken}`
+      'Authorization': `Bearer ${apiToken}`,
     };
 
-    // 5. Panggil API Pollinations dari backend Anda
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: headers,
-    });
+    // 5. Panggil API Pollinations dan dapatkan respons sebagai stream
+    const response = await fetch(url, { method: 'GET', headers });
 
     if (!response.ok) {
-      // Jika ada error dari API Pollinations, teruskan pesannya
       const errorText = await response.text();
-      return NextResponse.json({ error: `Pollinations API Error: ${errorText}` }, { status: response.status });
+      return new Response(JSON.stringify({ error: `Pollinations API Error: ${errorText}` }), { status: response.status });
     }
 
-    // 6. Dapatkan hasil teks dan kirim kembali ke frontend
-    const textResult = await response.text();
-    return NextResponse.json({ result: textResult });
+    // 6. Alirkan (stream) respons langsung kembali ke client
+    const stream = iteratorToStream(response.body!.getReader());
+
+    return new Response(stream, {
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
 
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
+    return new Response(JSON.stringify({ error: 'An internal server error occurred' }), { status: 500 });
   }
 }
