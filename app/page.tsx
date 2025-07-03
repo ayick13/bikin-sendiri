@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// Impor file CSS Module dengan nama baru
+// Pastikan nama file CSS ini sudah benar sesuai file Anda (misal: Home.module.css)
 import styles from './Home.module.css'; 
 import { Wand2, Copy, Check, Moon, Sun, LoaderCircle, Bot, Pilcrow } from 'lucide-react';
 
@@ -14,10 +14,10 @@ type AIModel = {
 export default function AdvancedGenerator() {
   // State untuk form inputs
   const [prompt, setPrompt] = useState('');
-  const [details, setDetails] = useState(''); // State baru untuk detail tambahan
+  const [details, setDetails] = useState('');
   const [model, setModel] = useState('openai');
   const [temperature, setTemperature] = useState(0.7);
-  const [availableModels, setAvailableModels] = useState<AIModel[]>([]); // State untuk menyimpan model
+  const [availableModels, setAvailableModels] = useState<AIModel[]>([]);
 
   // State untuk hasil dan UI
   const [result, setResult] = useState('');
@@ -36,7 +36,6 @@ export default function AdvancedGenerator() {
         }
         const models = await response.json();
         setAvailableModels(models);
-        // Set model default ke model pertama yang didapat, jika ada
         if (models.length > 0) {
           setModel(models[0].id);
         }
@@ -45,7 +44,7 @@ export default function AdvancedGenerator() {
       }
     };
     fetchModels();
-  }, []); // Array kosong berarti efek ini hanya berjalan sekali
+  }, []);
 
   // Efek untuk mengubah tema pada body
   useEffect(() => {
@@ -62,7 +61,6 @@ export default function AdvancedGenerator() {
     setError('');
     setIsCopied(false);
 
-    // Gabungkan prompt utama dengan detail tambahan
     const combinedPrompt = details ? `${prompt}\n\n## Detail Tambahan:\n${details}` : prompt;
 
     try {
@@ -73,15 +71,22 @@ export default function AdvancedGenerator() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch response');
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Server responded with status ${response.status}`);
+        } catch (jsonError) {
+          throw new Error(`An error occurred. Server responded with status ${response.status}`);
+        }
       }
 
       const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Failed to read response body.");
+      }
       const decoder = new TextDecoder();
 
       while (true) {
-        const { value, done } = await reader!.read();
+        const { value, done } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value);
         setResult((prev) => prev + chunk);
@@ -135,7 +140,6 @@ export default function AdvancedGenerator() {
             />
           </div>
 
-          {/* Textarea baru untuk detail tambahan */}
           <div className={styles.formGroup}>
             <label htmlFor="details" className={styles.label}>
                 <Bot size={16} style={{ display: 'inline-block', marginRight: '0.5rem' }}/>
