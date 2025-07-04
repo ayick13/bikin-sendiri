@@ -94,16 +94,17 @@ export default function ImageAnalysis() {
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
+      {/* Login overlay dipindah ke luar form agar tidak hilang saat navigasi mobile */}
+      {!isLoggedIn && (
+        <div className={styles.loginOverlay} style={{ zIndex: 100 }}>
+          <Lock size={48} />
+          <p>Login untuk mengakses fitur Analisis Gambar ini.</p>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className={styles.form} style={{ position: 'relative' }} autoComplete="off">
-        {!isLoggedIn && (
-          <div className={styles.loginOverlay}>
-            <Lock size={48} />
-            <p>Login untuk mengakses fitur Analisis Gambar ini.</p>
-          </div>
-        )}
         <fieldset className={!isLoggedIn ? styles.fieldsetDisabled : ''} disabled={!isLoggedIn || isLoading}>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Unggah Gambar</label>
+            <label className={styles.label} htmlFor="image-upload">Unggah Gambar</label>
             <div className={styles.uploadContainer}>
               <input
                 type="file"
@@ -112,8 +113,9 @@ export default function ImageAnalysis() {
                 ref={fileInputRef}
                 className={styles.uploadInput}
                 id="image-upload"
+                style={{ display: 'none' }}
               />
-              <label htmlFor="image-upload" className={styles.uploadButton}>
+              <label htmlFor="image-upload" className={styles.uploadButton} style={{ minWidth: 0 }}>
                 <Upload size={18} />
                 <span>Pilih Gambar</span>
               </label>
