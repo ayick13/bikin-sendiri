@@ -1509,3 +1509,16 @@ details[open] .summaryIcon {
   color: #fee2e2;
   border-color: #ef4444;
 }
+
+/* Menyembunyikan elemen secara visual tapi tetap bisa diakses oleh screen reader */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

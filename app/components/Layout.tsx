@@ -92,34 +92,38 @@ export default function Layout({ children }: LayoutProps) {
     </div>
   );
 
-  return (
-    <AppContext.Provider value={{ handleLoginTrigger }}>
-      <div className={styles.pageWrapper}>
-        <header className={styles.fixedHeader}>
-          <div className={styles.headerContent}>
-            <div className={styles.headerLeft}>
-              <Link href="/" className={styles.logoLink}>
-                <h1 className={styles.title}>AI <span>Studio</span>+</h1>
-              </Link>
-              <nav className={styles.navLinks}>
-                <Link href="/docs">Dokumentasi</Link>
-                <Link href="/e-kursus">E-Kursus</Link>
-                <Link href="/kontak">Kontak</Link>
-                <Link href="/kebijakan-privasi">Kebijakan Privasi</Link>
-              </nav>
-            </div>
-            
-            <div className={styles.headerRight}>
-              <div className={styles.desktopAuth}>
-                <AuthButtons onLoginTrigger={handleLoginTrigger} />
-              </div>
-              <ThemeSwitcher />
-              <button className={styles.hamburgerMenu} onClick={() => setIsMobileMenuOpen(true)}>
-                <Menu size={24} />
-              </button>
-            </div>
-          </div>
-        </header>
+   return (
+        <AppContext.Provider value={{ handleLoginTrigger }}>
+            {/* Beri label pada pembungkus utama untuk navigasi "lompat ke konten" */}
+            <div id="main-content" className={styles.pageWrapper}>
+                {/* Gunakan elemen <header> yang lebih semantik */}
+                <header className={styles.fixedHeader}>
+                    <div className={styles.headerContent}>
+                        <div className={styles.headerLeft}>
+                            <Link href="/" className={styles.logoLink} aria-label="Beranda AI Studio+">
+                                <h1 className={styles.title}>AI <span>Studio</span>+</h1>
+                            </Link>
+                            {/* Gunakan elemen <nav> untuk navigasi utama */}
+                            <nav className={styles.navLinks} aria-label="Navigasi Utama">
+                                <Link href="/docs">Dokumentasi</Link>
+                                <Link href="/e-kursus">E-Kursus</Link>
+                                <Link href="/kontak">Kontak</Link>
+                                <Link href="/kebijakan-privasi">Kebijakan Privasi</Link>
+                            </nav>
+                        </div>
+                        
+                        <div className={styles.headerRight}>
+                            <div className={styles.desktopAuth}>
+                                <AuthButtons onLoginTrigger={handleLoginTrigger} />
+                            </div>
+                            <ThemeSwitcher />
+                            {/* Beri label yang jelas untuk tombol menu mobile */}
+                            <button className={styles.hamburgerMenu} onClick={() => setIsMobileMenuOpen(true)} aria-label="Buka menu navigasi">
+                                <Menu size={24} />
+                            </button>
+                        </div>
+                    </div>
+                </header>
         
         <AnimatePresence>
           {isMobileMenuOpen && (

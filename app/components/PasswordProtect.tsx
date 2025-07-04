@@ -101,13 +101,14 @@ export default function PasswordProtect({ children }: PasswordProtectProps) {
         </div>
         <div className={styles.passwordInputContainer}>
           <input
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Masukkan password..."
-            className={styles.passwordInput}
-            required
-          />
+                        id="password-input" // Tambahkan id
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Masukkan password..."
+                        className={styles.passwordInput}
+                        required
+                    />
           <button
             type="button"
             className={styles.passwordVisibilityToggle}
