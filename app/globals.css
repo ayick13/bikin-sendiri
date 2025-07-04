@@ -7,8 +7,12 @@
   --text-primary-color: #111827;
   --text-secondary-color: #4b5563;
   --border-color: #e5e7eb;
-  --primary-color: #3b82f6;
-  --primary-hover-color: #2563eb;
+  
+  /* --- PERBAIKAN DI SINI --- */
+  /* Warna biru dibuat lebih gelap untuk kontras yang lebih baik */
+  --primary-color: #2563eb; /* Sebelumnya: #3b82f6 */
+  --primary-hover-color: #1d4ed8; /* Sebelumnya: #2563eb */
+  
   --input-background-color: #f9fafb;
 }
 
@@ -19,8 +23,12 @@
   --text-primary-color: #f9fafb;
   --text-secondary-color: #9ca3af;
   --border-color: #374151;
-  --primary-color: #60a5fa;
-  --primary-hover-color: #3b82f6;
+
+  /* --- PERBAIKAN DI SINI --- */
+  /* Warna biru dibuat sedikit lebih gelap untuk kontras dengan teks putih */
+  --primary-color: #3b82f6; /* Sebelumnya: #60a5fa */
+  --primary-hover-color: #2563eb; /* Sebelumnya: #3b82f6 */
+
   --input-background-color: #374151;
 }
 
@@ -88,7 +96,7 @@ a {
   text-align: center;
 }
 
-.credit-category h4 {
+.credit-category-title {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-primary-color);

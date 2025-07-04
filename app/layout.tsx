@@ -77,7 +77,7 @@ export default function RootLayout({
                 {/* --- BAGIAN UCAPAN TERIMA KASIH YANG SUDAH DIRAPIKAN --- */}
                 <div className="footer-credits">
                   <div className="credit-category">
-                    <h4>Services & Platforms</h4>
+                    <p>Services & Platforms</p>
                     <div className="credit-items">
                       <a href="https://pollinations.ai/" target="_blank" rel="noopener noreferrer" className="tech-item"><Bot size={14}/> Pollinations.ai</a>
                       <a href="https://www.google.com/" target="_blank" rel="noopener noreferrer" className="tech-item"><Globe size={14}/> Google</a>
@@ -89,7 +89,7 @@ export default function RootLayout({
                     </div>
                   </div>
                   <div className="credit-category">
-                    <h4>Frameworks & Libraries</h4>
+                    <p>Frameworks & Libraries</p>
                     <div className="credit-items">
                       <a href="https://nextjs.org/" target="_blank" rel="noopener noreferrer" className="tech-item"><Zap size={14}/> Next.js</a>
                       <a href="https://react.dev/" target="_blank" rel="noopener noreferrer" className="tech-item"><Sparkles size={14}/> React</a>
@@ -100,7 +100,7 @@ export default function RootLayout({
                     </div>
                   </div>
                   <div className="credit-category">
-                    <h4>Tooling & Language</h4>
+                    <p>Tooling & Language</p>
                     <div className="credit-items">
                       <a href="https://nodejs.org/" target="_blank" rel="noopener noreferrer" className="tech-item"><Box size={14}/> Node.js</a>
                       <a href="https://typescriptlang.org/" target="_blank" rel="noopener noreferrer" className="tech-item"><Code size={14}/> TypeScript</a>
