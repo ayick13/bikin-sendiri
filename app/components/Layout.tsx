@@ -104,6 +104,7 @@ export default function Layout({ children }: LayoutProps) {
               <nav className={styles.navLinks}>
                 <Link href="/docs">Dokumentasi</Link>
                 <Link href="/e-kursus">E-Kursus</Link>
+                <Link href="/kontak">Kontak</Link>
                 <Link href="/kebijakan-privasi">Kebijakan Privasi</Link>
               </nav>
             </div>
@@ -146,6 +147,7 @@ export default function Layout({ children }: LayoutProps) {
                 <nav className={styles.mobileNavLinks}>
                   <Link href="/docs">Dokumentasi</Link>
                   <Link href="/e-kursus">E-Kursus</Link>
+                  <Link href="/kontak">Kontak</Link>
                   <Link href="/kebijakan-privasi">Kebijakan Privasi</Link>
                 </nav>
                 <ThemeSwitcher />
