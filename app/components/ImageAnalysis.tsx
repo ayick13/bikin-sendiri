@@ -130,7 +130,7 @@ export default function ImageAnalysis() {
               {imageBase64 && (
                 <div className={styles.previewContainer}>
                   <Image src={imageBase64} alt="Preview" width={80} height={80} style={{ objectFit: 'cover', borderRadius: '8px' }}/>
-                  <button type="button" onClick={handleClear} className={styles.clearUploadButton} title="Hapus Gambar"><XCircle size={20}/></button>
+                  <button type="button" onClick={handleClear} className={styles.clearUploadButton} title="Hapus Gambar" aria-label="Hapus Gambar"><XCircle size={20}/></button>
                 </div>
               )}
             </div>
@@ -147,7 +147,7 @@ export default function ImageAnalysis() {
               required
             />
           </div>
-          <button type="submit" className={styles.button} disabled={isLoading || !isLoggedIn || !imageBase64}>
+          <button type="submit" className={styles.button} disabled={isLoading || !isLoggedIn || !imageBase64} aria-label="Analisis Gambar">
             {isLoading ? <LoaderCircle size={22} className={styles.loadingIcon} /> : <Eye size={22} />}
             <span>{isLoading ? 'Menganalisis...' : 'Analisis Gambar'}</span>
           </button>

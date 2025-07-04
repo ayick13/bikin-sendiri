@@ -30,7 +30,7 @@ export default function AuthButtons({ onLoginTrigger }: AuthButtonsProps) {
                         className={styles.avatar}
                     />
                 )}
-                <button onClick={() => signOut({ callbackUrl: '/' })} className={styles.authButton}>
+                <button onClick={() => signOut({ callbackUrl: '/' })} className={styles.authButton} aria-label="Logout">
                     <LogOut size={16} />
                     Sign Out
                 </button>
@@ -40,7 +40,7 @@ export default function AuthButtons({ onLoginTrigger }: AuthButtonsProps) {
 
     // Tombol login sekarang hanya memanggil fungsi dari props, tanpa logika dialog
     return (
-        <button onClick={onLoginTrigger} className={styles.authButton}>
+        <button onClick={onLoginTrigger} className={styles.authButton} aria-label="Login">
             <LogIn size={16} />
             <span>Login</span>
         </button>

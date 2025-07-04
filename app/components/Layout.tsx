@@ -86,9 +86,27 @@ export default function Layout({ children }: LayoutProps) {
 
   const ThemeSwitcher = () => (
     <div className={styles.themeSwitchContainer}>
-      <button onClick={() => handleThemeChange('light')} className={`${styles.themeSwitchButton} ${theme === 'light' ? styles.activeTheme : ''}`}><Sun size={16} /></button>
-      <button onClick={() => handleThemeChange('system')} className={`${styles.themeSwitchButton} ${theme === 'system' ? styles.activeTheme : ''}`}><Monitor size={16} /></button>
-      <button onClick={() => handleThemeChange('dark')} className={`${styles.themeSwitchButton} ${theme === 'dark' ? styles.activeTheme : ''}`}><Moon size={16} /></button>
+      <button 
+        onClick={() => handleThemeChange('light')} 
+        className={`${styles.themeSwitchButton} ${theme === 'light' ? styles.activeTheme : ''}`}
+        aria-label="Tema Terang"
+      >
+        <Sun size={16} />
+      </button>
+      <button 
+        onClick={() => handleThemeChange('system')} 
+        className={`${styles.themeSwitchButton} ${theme === 'system' ? styles.activeTheme : ''}`}
+        aria-label="Tema Sistem"
+      >
+        <Monitor size={16} />
+      </button>
+      <button 
+        onClick={() => handleThemeChange('dark')} 
+        className={`${styles.themeSwitchButton} ${theme === 'dark' ? styles.activeTheme : ''}`}
+        aria-label="Tema Gelap"
+      >
+        <Moon size={16} />
+      </button>
     </div>
   );
 
@@ -144,7 +162,7 @@ export default function Layout({ children }: LayoutProps) {
               >
                 <div className={styles.mobileMenuHeader}>
                   <h2>Menu</h2>
-                  <button className={styles.mobileMenuCloseButton} onClick={() => setIsMobileMenuOpen(false)}>
+                  <button className={styles.mobileMenuCloseButton} onClick={() => setIsMobileMenuOpen(false)} aria-label="Tutup menu navigasi">
                     <X size={28} />
                   </button>
                 </div>
@@ -176,11 +194,11 @@ export default function Layout({ children }: LayoutProps) {
                       Pilih provider pilihan Anda untuk melanjutkan.
                   </Dialog.Description>
                   <div className={styles.dialogAuthOptions}>
-                      <button onClick={() => handleSignIn('google')} className={styles.authButtonWide} disabled={!!loadingProvider}>
+                      <button onClick={() => handleSignIn('google')} className={styles.authButtonWide} disabled={!!loadingProvider} aria-label="Login dengan Google">
                           {loadingProvider === 'google' ? <LoaderCircle size={20} className={styles.loadingIcon} /> : <Image src="/google-icon.svg" alt="Google Icon" width={20} height={20} className={styles.authIcon} />}
                           <span>{loadingProvider === 'google' ? 'Mengarahkan...' : 'Lanjutkan dengan Google'}</span>
                       </button>
-                      <button onClick={() => handleSignIn('github')} className={styles.authButtonWide} disabled={!!loadingProvider}>
+                      <button onClick={() => handleSignIn('github')} className={styles.authButtonWide} disabled={!!loadingProvider} aria-label="Login dengan GitHub">
                           {loadingProvider === 'github' ? <LoaderCircle size={20} className={styles.loadingIcon} /> : <Github className={styles.authIcon} />}
                           <span>{loadingProvider === 'github' ? 'Mengarahkan...' : 'Lanjutkan dengan GitHub'}</span>
                       </button>

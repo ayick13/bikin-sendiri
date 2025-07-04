@@ -16,6 +16,7 @@ export default function PresetButton({ label, width, height, onClick }: PresetBu
       type="button"
       className={styles.presetButton}
       onClick={() => onClick(width, height)}
+      aria-label={`Preset rasio ${label}`}
     >
       {label}
     </button>
