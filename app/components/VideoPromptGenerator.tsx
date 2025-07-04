@@ -3,11 +3,16 @@
 
 import { useState } from 'react';
 import styles from '../Home.module.css';
-import { Film, Clapperboard, Camera, Palette, Sparkles, Wand2, Copy, Check, Sun, Aperture, Brush, Lock, LoaderCircle, Bot } from 'lucide-react';
+import { 
+    Film, Clapperboard, Camera, Palette, Sparkles, Wand2, Copy, Check, 
+    Sun, Aperture, Brush, Lock, Bot, Video, Star, Layers, BrainCircuit, 
+    Film as FilmIcon, Rocket, LoaderCircle // FIX: LoaderCircle ditambahkan di sini
+} from 'lucide-react';
 import CustomSelect from './CustomSelect';
 import { useSession } from 'next-auth/react';
+import ComingSoon from './ComingSoon';
 
-// Opsi untuk CustomSelect tetap sama
+// Opsi untuk CustomSelect
 const moodOptions = [
   { value: 'Cinematic', label: 'Cinematic' },
   { value: 'Epic', label: 'Epic' },
@@ -64,17 +69,18 @@ const lensOptions = [
   { value: 'Other', label: 'Other' },
 ];
 
-export default function VideoPromptGenerator() {
+// Komponen Form Generator yang sudah ada
+const DefaultVideoGenerator = () => {
     const { data: session } = useSession();
     const isLoggedIn = !!session?.user;
 
     // State untuk input form
-    const [subject, setSubject] = useState('a majestic eagle');
-    const [action, setAction] = useState('soaring through a thunderstorm');
+    const [subject, setSubject] = useState('Ironman Naik Pesawat');
+    const [action, setAction] = useState('Disetai badai dan petir yang menggelegar, Ironman terbang dengan pesawat jet tempur melewati langit yang gelap. Pesawatnya berkilau di bawah cahaya kilat, menciptakan kontras dramatis dengan awan badai yang mengancam di sekitarnya.');
     const [mood, setMood] = useState('Cinematic');
     const [style, setStyle] = useState('Realistic');
-    const [color, setColor] = useState('dark and moody colors with flashes of lightning');
-    const [artisticStyle, setArtisticStyle] = useState('in the style of a nature documentary');
+    const [color, setColor] = useState('dengan kilatan cahaya kuning dan biru yang dramatis');
+    const [artisticStyle, setArtisticStyle] = useState('dalam gaya film superhero modern, dengan fokus pada detail dan efek visual yang dramatis');
     const [timeAndWeather, setTimeAndWeather] = useState('Heavy rain');
     const [filmEffects, setFilmEffects] = useState('film grain, subtle lens flare');
     const [camera, setCamera] = useState('Dynamic drone shot');
@@ -92,12 +98,10 @@ export default function VideoPromptGenerator() {
     const generateVideoPrompt = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!isLoggedIn || isLoading) return;
-
         setIsLoading(true);
         setResult('');
         setError('');
         setIsCopied(false);
-
         try {
             const response = await fetch('/api/generate-video', {
                 method: 'POST',
@@ -108,21 +112,17 @@ export default function VideoPromptGenerator() {
                     lens, lighting, quality
                 }),
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || `Server responded with status ${response.status}`);
             }
-
             const reader = response.body?.getReader();
             if (!reader) throw new Error("Failed to read response body.");
             const decoder = new TextDecoder();
-
             while (true) {
                 const { value, done } = await reader.read();
                 if (done) break;
                 const chunk = decoder.decode(value);
-                // Proses streaming data seperti di text generator
                 const lines = chunk.split('\n');
                 for (const line of lines) {
                     if (line.startsWith('data: ')) {
@@ -131,14 +131,11 @@ export default function VideoPromptGenerator() {
                         try {
                             const parsed = JSON.parse(jsonString);
                             const textChunk = parsed.choices?.[0]?.delta?.content;
-                            if (textChunk) {
-                                setResult((prev) => prev + textChunk);
-                            }
-                        } catch (e) { /* Abaikan chunk tidak valid */ }
+                            if (textChunk) setResult((prev) => prev + textChunk);
+                        } catch (e) { /* Abaikan */ }
                     }
                 }
             }
-
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -161,7 +158,7 @@ export default function VideoPromptGenerator() {
                 {!isLoggedIn && (
                     <div className={styles.loginOverlay}>
                         <Lock size={48} />
-                        <p>Login untuk mengakses fitur Generator Video ini.</p>
+                        <p>Login untuk mengakses fitur ini.</p>
                     </div>
                 )}
                 <fieldset className={!isLoggedIn ? styles.fieldsetDisabled : ''} disabled={!isLoggedIn || isLoading}>
@@ -171,7 +168,6 @@ export default function VideoPromptGenerator() {
                         <label className={styles.label} htmlFor="action" style={{marginTop: '1rem', fontWeight: 400}}>(Aksi/Adegan)</label>
                         <textarea id="action" value={action} onChange={e => setAction(e.target.value)} placeholder="Aksi/Adegan..." rows={2} className={styles.textarea} style={{marginTop: '0.5rem'}} required />
                     </div>
-
                     <div className={styles.formGroup}>
                         <label className={styles.label}><Palette size={16}/> Mood & Style</label>
                         <div className={styles.controlsGrid}>
@@ -181,7 +177,6 @@ export default function VideoPromptGenerator() {
                         <label className={styles.label} htmlFor="color" style={{marginTop: '1rem', fontWeight: 400}}>(Palet warna)</label>
                         <input id="color" type="text" value={color} onChange={e => setColor(e.target.value)} placeholder="Palet warna..." className={styles.input} style={{marginTop: '0.5rem'}} />
                     </div>
-
                     <div className={styles.formGroup}>
                         <label className={styles.label}><Brush size={16}/> Artistic & Environment</label>
                         <div className={styles.controlsGrid}>
@@ -195,7 +190,6 @@ export default function VideoPromptGenerator() {
                             </div>
                         </div>
                     </div>
-
                     <div className={styles.formGroup}>
                         <label className={styles.label}><Camera size={16}/> Camera & Technicals</label>
                         <div className={styles.controlsGrid}>
@@ -207,7 +201,6 @@ export default function VideoPromptGenerator() {
                             <input id="lighting" type="text" value={lighting} onChange={e => setLighting(e.target.value)} placeholder="Pencahayaan..." className={styles.input} />
                         </div>
                     </div>
-                    
                     <div className={styles.formGroup}>
                         <label className={styles.label}><Sparkles size={16}/> Effects & Quality</label>
                         <div className={styles.controlsGrid}>
@@ -215,14 +208,13 @@ export default function VideoPromptGenerator() {
                             <input id="quality" type="text" value={quality} onChange={e => setQuality(e.target.value)} placeholder="Detail kualitas..." className={styles.input} />
                         </div>
                     </div>
-
                     <button type="submit" className={styles.button} disabled={isLoading || !isLoggedIn}>
                         {isLoading ? <LoaderCircle size={22} className={styles.loadingIcon} /> : <Wand2 size={22} />}
                         <span>{isLoading ? 'Generating...' : 'Generate with AI'}</span>
                     </button>
                 </fieldset>
             </form>
-            {(error || result) && (
+            {(isLoading || error || result) && (
                 <div className={styles.resultCard}>
                     <h2 className={styles.resultHeader}><Bot size={24}/> AI Generated Video Prompt</h2>
                     {error ? ( <p style={{color: "var(--error-color)"}}><strong>Error:</strong> {error}</p> ) 
@@ -237,4 +229,65 @@ export default function VideoPromptGenerator() {
             )}
         </>
     );
+};
+
+
+export default function VideoPromptGenerator() {
+  const [activeModel, setActiveModel] = useState('default');
+
+  const renderContent = () => {
+    switch (activeModel) {
+      case 'veo':
+        return <ComingSoon title="Google Veo 3" description="Model video generasi berikutnya dari Google, menjanjikan kualitas sinematik dan pemahaman konteks yang luar biasa. Fitur ini akan segera terintegrasi." />;
+      case 'capcut':
+        return <ComingSoon title="CapCut" description="Model video generasi CapCut yang menjanjikan kualitas editing dan  konteks yang luar biasa. Fitur ini akan segera terintegrasi." />;
+        case 'kling':
+        return <ComingSoon title="Kling AI" description="Generator video dari Kuaishou Technology yang mampu menghasilkan video full HD hingga 2 menit dengan gerakan kompleks dan realistis. Nantikan kehadirannya." />;
+      case 'sora':
+        return <ComingSoon title="OpenAI Sora" description="Model AI dari OpenAI yang dapat menciptakan adegan realistis dan imajinatif dari instruksi teks, menghasilkan video berkualitas tinggi." />;
+      case 'lumiere':
+        return <ComingSoon title="Google Lumiere" description="Model difusi teks-ke-video yang dirancang untuk mensintesis video yang bergerak secara realistis, beragam, dan koheren." />;
+      case 'runway':
+        return <ComingSoon title="Runway Gen-3 Alpha" description="Generasi terbaru dari RunwayML yang menawarkan peningkatan fidelitas, konsistensi, dan kecepatan dalam pembuatan video dari teks." />;
+      case 'lora':
+        return <ComingSoon title="Lora & TensorArt" description="Integrasi dengan model LoRA (Low-Rank Adaptation) dari TensorArt untuk kustomisasi gaya karakter dan objek yang mendalam pada video Anda. Segera hadir." />;
+      case 'default':
+      default:
+        return <DefaultVideoGenerator />;
+    }
+  };
+
+  return (
+    <div>
+      <div className={styles.subTabContainer}>
+        <button className={`${styles.subTab} ${activeModel === 'default' ? styles.activeSubTab : ''}`} onClick={() => setActiveModel('default')}>
+          <Video size={16} /> Default
+        </button>
+        <button className={`${styles.subTab} ${activeModel === 'veo' ? styles.activeSubTab : ''}`} onClick={() => setActiveModel('veo')}>
+          <Star size={16} /> Google Veo 3 <span className={styles.comingSoonBadge}>Coming Soon</span>
+        </button>
+        <button className={`${styles.subTab} ${activeModel === 'capcut' ? styles.activeSubTab : ''}`} onClick={() => setActiveModel('capcut')}>
+          <Clapperboard size={16} /> CapCut <span className={styles.comingSoonBadge}>Coming Soon</span>
+        </button>
+        <button className={`${styles.subTab} ${activeModel === 'kling' ? styles.activeSubTab : ''}`} onClick={() => setActiveModel('kling')}>
+          <Star size={16} /> Kling AI <span className={styles.comingSoonBadge}>Coming Soon</span>
+        </button>
+        <button className={`${styles.subTab} ${activeModel === 'sora' ? styles.activeSubTab : ''}`} onClick={() => setActiveModel('sora')}>
+          <BrainCircuit size={16} /> Sora <span className={styles.comingSoonBadge}>Coming Soon</span>
+        </button>
+        <button className={`${styles.subTab} ${activeModel === 'lumiere' ? styles.activeSubTab : ''}`} onClick={() => setActiveModel('lumiere')}>
+          <FilmIcon size={16} /> Lumiere <span className={styles.comingSoonBadge}>Coming Soon</span>
+        </button>
+        <button className={`${styles.subTab} ${activeModel === 'runway' ? styles.activeSubTab : ''}`} onClick={() => setActiveModel('runway')}>
+          <Rocket size={16} /> Runway Gen-3 <span className={styles.comingSoonBadge}>Coming Soon</span>
+        </button>
+        <button className={`${styles.subTab} ${activeModel === 'lora' ? styles.activeSubTab : ''}`} onClick={() => setActiveModel('lora')}>
+          <Layers size={16} /> Lora / TensorArt <span className={styles.comingSoonBadge}>Coming Soon</span>
+        </button>
+      </div>
+      <div className={styles.subTabContent}>
+        {renderContent()}
+      </div>
+    </div>
+  );
 }

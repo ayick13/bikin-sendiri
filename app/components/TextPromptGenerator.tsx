@@ -10,7 +10,7 @@ type AIModel = { id: string; name: string; };
 
 export default function TextPromptGenerator() {
   const [systemPrompt, setSystemPrompt] = useState(
-    'You are an expert prompt engineer for AI image generators. Your task is to take the user\'s simple input and expand it into a rich, detailed, and descriptive prompt. Do not ask questions. Do not explain your process. Only output the final, enhanced prompt as a single paragraph of comma-separated keywords and phrases.'
+    'Anda adalah seorang ahli rekayasa prompt untuk generator gambar AI. Tugas Anda adalah mengambil masukan sederhana dari pengguna dan mengembangkannya menjadi prompt yang kaya, detail, dan deskriptif. Jangan bertanya. Jangan jelaskan proses Anda. Hanya hasilkan prompt akhir yang telah disempurnakan sebagai satu paragraf atau lebih berisi kata kunci dan frasa yang dipisahkan koma.'
   );
   const [prompt, setPrompt] = useState('');
   const [details, setDetails] = useState('');

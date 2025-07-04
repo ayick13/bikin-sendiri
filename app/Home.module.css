@@ -152,7 +152,6 @@
   transition: background-color 0.3s, border-color 0.3s;
 }
 
-/* FIX: Menghilangkan border default dari fieldset */
 .form fieldset {
   border: none;
   padding: 0;
@@ -608,7 +607,7 @@ details[open] .summaryIcon {
   }
 }
 
-/* === Gaya untuk Generate Gambar === */
+/* === Gaya untuk Generate Gambar & Video === */
 .iconButton {
   display: flex;
   align-items: center;
@@ -922,4 +921,116 @@ details[open] .summaryIcon {
 
 .clearUploadButton:hover {
     transform: scale(1.1);
+}
+
+/* === Gaya Baru untuk Sub-Navigasi Tab (Responsif) === */
+.subTabContainer {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  flex-wrap: wrap; /* Tombol akan turun ke baris baru jika tidak cukup ruang */
+}
+
+.subTab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: transparent;
+  color: var(--text-secondary-color);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  white-space: nowrap; 
+}
+
+.subTab:hover {
+  background-color: var(--input-background-color);
+  color: var(--text-primary-color);
+}
+
+.activeSubTab {
+  color: var(--primary-color);
+  background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
+}
+
+.subTabContent {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.comingSoonBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.comingSoonContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    background-color: var(--card-background-color);
+    border-radius: 12px;
+    gap: 1.5rem;
+}
+
+.comingSoonIconWrapper {
+    position: relative;
+    color: var(--primary-color);
+}
+
+.comingSoonSparkle {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    color: #f59e0b;
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+}
+
+.comingSoonTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary-color);
+}
+
+.comingSoonText {
+    max-width: 500px;
+    color: var(--text-secondary-color);
+    line-height: 1.6;
+}
+
+.notifyButton {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary-color);
+    background-color: var(--input-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: not-allowed;
+}
+.notifyButton:hover {
+    background-color: var(--border-color);
+    color: var(--text-primary-color);
 }
