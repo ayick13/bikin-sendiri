@@ -7,7 +7,8 @@ import SupportToast from "./components/SupportToast"; // Impor komponen baru
 // Impor ikon yang dibutuhkan dari lucide-react
 import { 
     Github, Globe, Cloud, Zap, Bot, Sparkles, Box, Triangle, Wind, KeyRound, 
-    Code, CheckCircle, Paintbrush, Package, Wand, Shield
+    Code, CheckCircle, Paintbrush, Package, Wand, Shield,
+    Wand2Icon
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -84,6 +85,8 @@ export default function RootLayout({
                       <a href="https://vercel.com/" target="_blank" rel="noopener noreferrer" className="tech-item"><Triangle size={14}/> Vercel</a>
                       <a href="https://www.cloudflare.com/" target="_blank" rel="noopener noreferrer" className="tech-item"><Cloud size={14}/> Cloudflare</a>
                       <a href="https://github.com/" target="_blank" rel="noopener noreferrer" className="tech-item"><Github size={14}/> GitHub</a>
+                      <a href="https://openai.com/" target="_blank" rel="noopener noreferrer" className="tech-item"><Wand2Icon size={14}/> OpenAI</a>
+
                     </div>
                   </div>
                   <div className="credit-category">
