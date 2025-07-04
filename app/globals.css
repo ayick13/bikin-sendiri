@@ -110,10 +110,19 @@ a {
     color: var(--text-secondary-color);
     transition: color 0.2s;
     font-size: 0.85rem;
+    
+    /* --- PERBAIKAN DI SINI --- */
+    /* Tambahkan padding untuk memperluas area sentuh */
+    padding: 0.5rem 0.25rem; 
+    
+    /* (Opsional) Beri sedikit radius untuk estetika */
+    border-radius: 4px;
 }
 
 .tech-item:hover {
     color: var(--primary-color);
+    /* (Opsional) Tambahkan background saat hover */
+    background-color: var(--input-background-color);
 }
 
 /* === PERBAIKAN TATA LETAK FOOTER MOBILE (WRAPPING) === */
