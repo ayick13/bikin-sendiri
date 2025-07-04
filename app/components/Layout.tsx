@@ -5,9 +5,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { signIn } from "next-auth/react";
+import * as Dialog from '@radix-ui/react-dialog';
 import styles from '../Home.module.css';
-import { Sun, Moon, Monitor, Menu, X } from 'lucide-react';
+import { Sun, Moon, Monitor, Menu, X, LoaderCircle, Github } from 'lucide-react';
 import AuthButtons from './AuthButtons';
+import Image from "next/image";
 
 type Theme = 'system' | 'light' | 'dark';
 
@@ -18,12 +21,18 @@ type LayoutProps = {
 export default function Layout({ children }: LayoutProps) {
   const [theme, setTheme] = useState<Theme>('system');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // State untuk dialog login sekarang ada di sini
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
+
   const pathname = usePathname();
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
+  // Efek tema (tidak ada perubahan)
   useEffect(() => {
     const root = window.document.documentElement;
     const savedTheme = localStorage.getItem('theme') as Theme | null;
@@ -57,6 +66,20 @@ export default function Layout({ children }: LayoutProps) {
     localStorage.setItem('theme', newTheme);
   };
   
+  // Fungsi untuk menangani proses sign-in
+  const handleSignIn = async (provider: 'google' | 'github') => {
+      setLoadingProvider(provider);
+      await signIn(provider, { callbackUrl: '/' });
+  };
+
+  // Fungsi untuk membuka dialog login, sekaligus menutup menu mobile jika perlu
+  const handleLoginTrigger = () => {
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
+    setIsLoginDialogOpen(true);
+  };
+
   const ThemeSwitcher = () => (
     <div className={styles.themeSwitchContainer}>
       <button onClick={() => handleThemeChange('light')} className={`${styles.themeSwitchButton} ${theme === 'light' ? styles.activeTheme : ''}`}><Sun size={16} /></button>
@@ -80,13 +103,10 @@ export default function Layout({ children }: LayoutProps) {
           </div>
           
           <div className={styles.headerRight}>
-            {/* AuthButtons untuk Desktop */}
             <div className={styles.desktopAuth}>
-              <AuthButtons />
+              <AuthButtons onLoginTrigger={handleLoginTrigger} />
             </div>
-            {/* Theme switcher untuk Desktop */}
             <ThemeSwitcher />
-            {/* Tombol Hamburger (Hanya tampil di mobile) */}
             <button className={styles.hamburgerMenu} onClick={() => setIsMobileMenuOpen(true)}>
               <Menu size={24} />
             </button>
@@ -123,7 +143,7 @@ export default function Layout({ children }: LayoutProps) {
               </nav>
               <ThemeSwitcher />
               <div className={styles.mobileAuthContainer}>
-                <AuthButtons />
+                <AuthButtons onLoginTrigger={handleLoginTrigger} />
               </div>
             </motion.div>
           </motion.div>
@@ -133,6 +153,53 @@ export default function Layout({ children }: LayoutProps) {
       <main className={styles.mainContent}>
         {children}
       </main>
+
+      {/* Dialog login sekarang menjadi bagian dari Layout utama */}
+      <Dialog.Root open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
+        <Dialog.Portal>
+            <Dialog.Overlay className={styles.dialogOverlay} />
+            <Dialog.Content className={styles.dialogContent}>
+                <Dialog.Title className={styles.dialogTitle}>Login ke AI Studio+</Dialog.Title>
+                <Dialog.Description className={styles.dialogDescription}>
+                    Pilih provider pilihan Anda untuk melanjutkan.
+                </Dialog.Description>
+                
+                <div className={styles.dialogAuthOptions}>
+                    <button
+                        onClick={() => handleSignIn('google')}
+                        className={styles.authButtonWide}
+                        disabled={!!loadingProvider}
+                    >
+                        {loadingProvider === 'google' ? <LoaderCircle size={20} className={styles.loadingIcon} /> : (
+                            <Image
+                                src="/google-icon.svg"
+                                alt="Google Icon"
+                                width={20}
+                                height={20}
+                                className={styles.authIcon}
+                            />
+                        )}
+                        <span>{loadingProvider === 'google' ? 'Mengarahkan...' : 'Lanjutkan dengan Google'}</span>
+                    </button>
+                    <button
+                        onClick={() => handleSignIn('github')}
+                        className={styles.authButtonWide}
+                        disabled={!!loadingProvider}
+                    >
+                        {loadingProvider === 'github' ? <LoaderCircle size={20} className={styles.loadingIcon} /> : <Github className={styles.authIcon} />}
+                        <span>{loadingProvider === 'github' ? 'Mengarahkan...' : 'Lanjutkan dengan GitHub'}</span>
+                    </button>
+                </div>
+
+                <Dialog.Close asChild>
+                    <button className={styles.dialogCloseButton} aria-label="Close">
+                        <X size={20} />
+                    </button>
+                </Dialog.Close>
+            </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
       <footer className={styles.footer}>
         <p>&copy; {new Date().getFullYear()} AI Studio+. All rights reserved.</p>
       </footer>
