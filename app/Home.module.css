@@ -1266,3 +1266,203 @@ details[open] .summaryIcon {
 .loginOverlayButton:hover {
   background-color: var(--primary-hover-color);
 }
+
+/* === Gaya untuk Halaman E-Kursus === */
+.courseGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  width: 100%;
+}
+
+.courseCard {
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.courseCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.courseCardIcon {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.courseCardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary-color);
+}
+
+.courseCardDescription {
+  font-size: 0.95rem;
+  color: var(--text-secondary-color);
+  line-height: 1.6;
+  flex-grow: 1; /* Mendorong tombol ke bawah */
+  margin-bottom: 1.5rem;
+}
+.courseCardButton {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: not-allowed;
+  text-align: center;
+  /* Gaya untuk tombol disabled */
+  background-color: var(--input-background-color);
+  color: var(--text-secondary-color);
+  border: 1px solid var(--border-color);
+}
+/* === Gaya untuk Tombol Show More === */
+.showMoreContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
+}
+
+.showMoreButton {
+  /* UBAH DI SINI: Tambahkan width 100% */
+  width: 100%; 
+  padding: 0.875rem 2rem; /* Sedikit menambah padding vertikal */
+  font-size: 1.125rem; /* Sedikit memperbesar font */
+  font-weight: 600;
+  color: var(--text-primary-color);
+  background-color: var(--input-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.showMoreButton:hover {
+  background-color: var(--border-color);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* === Gaya untuk Halaman Proteksi Password === */
+.passwordFormContainer {
+  background-color: var(--card-background-color);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  margin: 2rem auto;
+  max-width: 500px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid var(--border-color);
+}
+
+.passwordFormIcon {
+  color: var(--primary-color);
+}
+
+.passwordFormTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  color: var(--text-primary-color);
+}
+
+.passwordFormDescription {
+  color: var(--text-secondary-color);
+  margin-top: 0.5rem;
+  margin-bottom: 2rem;
+  max-width: 350px;
+}
+
+.passwordForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Gaya untuk Input Password yang memiliki ikon di dalamnya */
+.passwordInputContainer {
+  position: relative;
+  width: 100%;
+}
+/* Modifikasi input agar ada ruang untuk ikon */
+.passwordInput {
+  width: 100%;
+  padding: 0.875rem 3rem 0.875rem 1rem; /* Tambah padding kanan untuk ikon */
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--input-background-color);
+  color: var(--text-primary-color);
+  text-align: center;
+}
+
+/* Gaya untuk tombol ikon mata */
+.passwordVisibilityToggle {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary-color);
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.passwordVisibilityToggle:hover {
+  color: var(--text-primary-color);
+}
+
+.passwordInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 30%, transparent);
+}
+
+.passwordButton {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: white;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.passwordButton:hover:not(:disabled) {
+  background-color: var(--primary-hover-color);
+}
+
+.passwordButton:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.passwordFormError {
+  margin-top: 1rem;
+  color: #ef4444; /* Warna merah untuk error */
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
