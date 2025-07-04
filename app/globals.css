@@ -74,12 +74,12 @@ a {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 2rem 3rem; /* Jarak vertikal dan horizontal antar kategori */
+  gap: 2rem 3rem; 
   margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  padding: 1.5rem 1.5rem 0; /* Menyesuaikan padding */
   border-top: 1px solid var(--border-color);
   width: 100%;
-  max-width: 800px;
+  /* max-width: 800px; */ /* HAPUS ATAU KOMENTARI BARIS INI */
   margin-left: auto;
   margin-right: auto;
 }

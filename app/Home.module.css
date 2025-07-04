@@ -3,21 +3,112 @@
 /* Gaya untuk kontainer utama */
 .container {
   min-height: 100vh;
-  padding: 2rem 1rem;
+  padding: 2rem 1.5rem; /* Sedikit menambah padding samping */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */ /* HAPUS ATAU KOMENTARI BARIS INI */
 }
 
-/* Gaya untuk header */
-.header {
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.fixedHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 700px;
+  /* FIX: Ganti ke warna background solid sesuai tema */
+  background-color: var(--background-color); 
+  /* Hapus efek blur karena background sudah solid */
+  /* backdrop-filter: blur(10px); */
+  /* -webkit-backdrop-filter: blur(10px); */
+  border-bottom: 1px solid var(--border-color);
+  z-index: 1000;
+  padding: 0 1.5rem;
+}
+
+.headerContent {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 64px;
 }
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Pastikan tombol login dan theme switcher selalu sejajar di desktop */
+.desktopAuth {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logoLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+.navLinks {
+  display: flex;
+  gap: 1.5rem;
+  font-weight: 500;
+}
+
+.navLinks a {
+  text-decoration: none;
+  color: var(--text-secondary-color);
+  transition: color 0.2s ease;
+}
+
+.navLinks a:hover {
+  color: var(--text-primary-color);
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between; /* Ini akan mendorong .headerLeft dan .themeSwitchContainer ke ujung */
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 64px;
+}
+
+/* Tambahkan class baru ini */
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 2rem; /* Jarak antara logo dan navigasi */
+}
+
+.mainContent {
+  padding-top: 80px; /* Tinggi header + sedikit margin */
+  padding-bottom: 2rem;
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.footer {
+  width: 100%;
+  text-align: center;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary-color);
+  font-size: 0.9rem;
+}
+
 
 /* Gaya untuk judul halaman */
 .title {
@@ -30,71 +121,84 @@
   transition: color 0.3s;
 }
 
-/* Tombol untuk mengganti tema */
-.themeToggleButton {
+.themeSwitchContainer {
+  display: flex;
+  align-items: center;
+  background-color: var(--input-background-color);
+  border-radius: 9999px; /* Pill shape */
+  padding: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.themeSwitchButton {
   background-color: transparent;
   border: none;
-  padding: 0.5rem;
-  border-radius: 50%;
+  border-radius: 9999px;
+  padding: 6px 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-secondary-color);
-  transition: background-color 0.2s, color 0.2s;
+  transition: all 0.2s ease-in-out;
 }
 
-.themeToggleButton:hover {
-  background-color: var(--input-background-color);
+.themeSwitchButton:hover:not(.activeTheme) {
   color: var(--text-primary-color);
 }
 
+.activeTheme {
+  background-color: var(--card-background-color);
+  color: var(--primary-color);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
 /* Kontainer untuk elemen autentikasi */
+/* --- Tombol Login & Otentikasi --- */
 .authContainer {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
 }
 
-/* Gaya untuk avatar pengguna */
-.avatar {
-    border-radius: 50%;
-}
-
-/* Gaya untuk tombol autentikasi */
 .authButton {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background-color: var(--input-background-color);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary-color);
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--input-background-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary-color);
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .authButton:hover {
-    background-color: var(--border-color);
+  background-color: var(--border-color);
 }
 
-/* Gaya untuk indikator loading autentikasi */
 .authLoading {
-    width: 90px;
-    height: 38px;
-    background-color: var(--input-background-color);
-    border-radius: 8px;
+  width: 90px;
+  height: 38px;
+  background-color: var(--input-background-color);
+  border-radius: 8px;
+}
+
+.avatar {
+  border-radius: 50%;
 }
 
 /* Gaya untuk konten utama */
 .main {
   width: 100%;
-  max-width: 700px;
+  /* max-width: 700px; */ /* HAPUS ATAU KOMENTARI BARIS INI */
 }
 
-/* Gaya untuk Tab Navigasi */
+
+/* --- Navigasi Tab Utama --- */
 .tabContainer {
   display: flex;
   flex-direction: column;
@@ -107,8 +211,8 @@
 }
 
 .tabRow {
-    display: flex;
-    gap: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .tab {
@@ -143,13 +247,11 @@
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Gaya untuk Form dan Elemennya */
+/* --- Konten Form --- */
 .form {
   background-color: var(--card-background-color);
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: none;
-  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .form fieldset {
@@ -167,7 +269,6 @@
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: var(--text-secondary-color);
-  transition: color 0.3s;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -391,9 +492,11 @@ details[open] .summaryIcon {
   align-items: center;
   gap: 0.5rem;
 }
+
 .button:hover {
   background-color: var(--primary-hover-color);
 }
+
 .button:disabled {
   background-color: #9ca3af;
   cursor: not-allowed;
@@ -408,12 +511,12 @@ details[open] .summaryIcon {
 }
 
 /* Kartu Hasil */
+/* --- Hasil & Kartu --- */
 .resultCard {
   margin-top: 2.5rem;
   padding: 2rem;
   border-radius: 12px;
   background-color: var(--card-background-color);
-  box-shadow: none;
 }
 
 .resultHeader {
@@ -438,6 +541,7 @@ details[open] .summaryIcon {
   color: var(--text-secondary-color);
   min-height: 100px;
 }
+
 .resultText.done::after {
   content: none;
 }
@@ -771,25 +875,31 @@ details[open] .summaryIcon {
     margin-top: 1.5rem;
 }
 
+.audioResultActions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
 .actionButton {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    background-color: var(--input-background-color);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary-color);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background-color: var(--input-background-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .actionButton:hover:not(:disabled) {
-    background-color: var(--border-color);
-    color: var(--primary-color);
-    border-color: var(--primary-color);
+  background-color: var(--border-color);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 .historyContainer {
@@ -876,9 +986,6 @@ details[open] .summaryIcon {
     gap: 1rem;
 }
 
-.uploadInput {
-    display: none;
-}
 
 .uploadButton {
     display: inline-flex;
@@ -1033,4 +1140,108 @@ details[open] .summaryIcon {
 .notifyButton:hover {
     background-color: var(--border-color);
     color: var(--text-primary-color);
+}
+
+/* Gaya untuk Tombol Hamburger Menu di Mobile */
+/* --- Mobile Menu & Responsif --- */
+.hamburgerMenu {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary-color);
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.mobileMenuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  z-index: 1001;
+}
+
+.mobileMenuContent {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 80%;
+  max-width: 300px;
+  height: 100%;
+  background-color: var(--background-color);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+}
+
+.mobileMenuHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobileMenuHeader h2 {
+  font-size: 1.5rem;
+}
+
+.mobileMenuCloseButton {
+  background: none;
+  border: none;
+  color: var(--text-primary-color);
+  cursor: pointer;
+}
+
+.mobileNavLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.mobileAuthContainer {
+  margin-top: auto;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+  /* Sembunyikan navigasi & semua item di kanan header desktop */
+  .navLinks,
+  .headerRight {
+    display: none;
+  }
+
+  /* Tampilkan tombol hamburger */
+  .hamburgerMenu {
+    display: block;
+    order: 2; /* Pindahkan ke paling kanan jika diperlukan */
+  }
+
+  /* Atur ulang .headerRight untuk mobile agar hanya hamburger yang terlihat */
+  .headerRight {
+    display: flex; /* Pastikan .headerRight tetap flex agar hamburger bisa muncul */
+    gap: 0;
+    align-items: center;
+  }
+
+  /* Sembunyikan elemen lain di dalam .headerRight di mobile */
+  .desktopAuth, .themeSwitchContainer {
+    display: none;
+  }
+
+  /* Sesuaikan header di mobile */
+  .headerLeft {
+    gap: 1rem;
+  }
+
+  .themeSwitchContainer {
+    display: flex !important;
+    margin-left: auto;
+  }
 }
