@@ -3,10 +3,11 @@
 
 import { useState, useEffect } from 'react';
 import styles from './Home.module.css';
-import { Sun, Moon, Pencil, Video, Image as ImageIcon } from 'lucide-react';
+import { Sun, Moon, Pencil, Video, Image as ImageIcon, Eye } from 'lucide-react';
 import TextPromptGenerator from './components/TextPromptGenerator';
 import VideoPromptGenerator from './components/VideoPromptGenerator';
 import ImageGenerator from './components/ImageGenerator';
+import ImageAnalysis from './components/ImageAnalysis'; // Impor komponen baru
 import AuthButtons from './components/AuthButtons';
 
 export default function HomePage() {
@@ -26,7 +27,7 @@ export default function HomePage() {
       <main className={styles.main}>
         <div className={styles.header}>
           <h1 className={styles.title}>
-            Prompt <span>Studio</span>+
+            AI <span>Studio</span>+
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <AuthButtons />
@@ -36,43 +37,32 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Kontainer tab yang sudah disatukan */}
         <div className={styles.tabContainer}>
-          {/* Baris pertama untuk dua tab */}
+          {/* Baris pertama */}
           <div className={styles.tabRow}>
-            <button 
-              className={`${styles.tab} ${activeTab === 'text' ? styles.activeTab : ''}`}
-              onClick={() => setActiveTab('text')}
-            >
-              <Pencil size={16} />
-              Creator Prompt Teks
+            <button className={`${styles.tab} ${activeTab === 'text' ? styles.activeTab : ''}`} onClick={() => setActiveTab('text')}>
+              <Pencil size={16} /> Creator Prompt Teks
             </button>
-            <button 
-              className={`${styles.tab} ${activeTab === 'video' ? styles.activeTab : ''}`}
-              onClick={() => setActiveTab('video')}
-            >
-              <Video size={16} />
-              Creator Prompt Video
+            <button className={`${styles.tab} ${activeTab === 'video' ? styles.activeTab : ''}`} onClick={() => setActiveTab('video')}>
+              <Video size={16} /> Creator Prompt Video
             </button>
           </div>
-          {/* Baris kedua untuk tab gambar */}
+          {/* Baris kedua */}
           <div className={styles.tabRow}>
-              <button 
-                  className={`${styles.tab} ${activeTab === 'image' ? styles.activeTab : ''}`}
-                  onClick={() => setActiveTab('image')}
-                  style={{ width: '100%' }} // Memastikan tombol memanjang
-              >
-                  <ImageIcon size={16} />
-                  Generate Gambar
+              <button className={`${styles.tab} ${activeTab === 'image' ? styles.activeTab : ''}`} onClick={() => setActiveTab('image')}>
+                  <ImageIcon size={16} /> Generate Gambar
+              </button>
+              <button className={`${styles.tab} ${activeTab === 'analysis' ? styles.activeTab : ''}`} onClick={() => setActiveTab('analysis')}>
+                  <Eye size={16} /> Analisis Gambar
               </button>
           </div>
         </div>
-
 
         <div className={styles.tabContent}>
             {activeTab === 'text' && <TextPromptGenerator />}
             {activeTab === 'video' && <VideoPromptGenerator />}
             {activeTab === 'image' && <ImageGenerator />}
+            {activeTab === 'analysis' && <ImageAnalysis />}
         </div>
       </main>
     </div>

@@ -4,50 +4,36 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AuthProvider from "./components/AuthProvider";
 
-// Metadata Lengkap untuk SEO dan Social Sharing
 export const metadata: Metadata = {
-  // Judul dasar dan template
   title: {
-    template: '%s | Prompt Studio Pro',
-    default: 'Prompt Studio Pro - AI Text & Video Prompt Creator',
+    template: '%s | AI Studio+',
+    default: 'AI Studio+ - AI Text, Video, Image Creator & Analyzer',
   },
-  // Deskripsi utama
-  description: 'Alat canggih untuk membuat dan menyempurnakan prompt teks dan video dengan bantuan AI. Dilengkapi dengan pengaturan lanjutan untuk hasil yang maksimal.',
-  
-  // URL dasar untuk semua metadata URL absolut
-  // Ganti dengan domain Anda jika sudah berbeda
+  description: 'Alat canggih untuk membuat, menyempurnakan, dan menganalisis prompt dan gambar dengan bantuan AI. Dilengkapi dengan pengaturan lanjutan untuk hasil yang maksimal.',
   metadataBase: new URL('https://bikinsendiri.my.id'),
-
-  // Keywords untuk SEO
-  keywords: ['prompt generator', 'ai prompt', 'prompt engineering', 'text prompt', 'video prompt', 'AI tools', 'pollinations.ai', 'Gresik'],
-
-  // Open Graph (untuk Facebook, LinkedIn, WhatsApp, dll.)
+  keywords: ['prompt generator', 'ai prompt', 'image generator', 'image analysis', 'prompt engineering', 'text prompt', 'video prompt', 'AI tools', 'pollinations.ai', 'Gresik'],
   openGraph: {
-    title: 'Prompt Studio Pro - AI Text & Video Prompt Creator',
-    description: 'Alat canggih untuk membuat prompt AI untuk teks dan video.',
-    url: 'https://bikinsendiri.my.id', // Ganti dengan domain Anda
-    siteName: 'Prompt Studio Pro',
+    title: 'AI Studio+ - AI Text, Video, Image Creator & Analyzer',
+    description: 'Alat canggih untuk membuat dan menganalisis prompt dan gambar dengan AI.',
+    url: 'https://bikinsendiri.my.id',
+    siteName: 'AI Studio+',
     images: [
       {
-        url: '/og-image.webp', // Path ke gambar di folder `public`
+        url: '/og-image.webp',
         width: 1200,
         height: 630,
-        alt: 'Tampilan aplikasi Prompt Studio Pro',
+        alt: 'Tampilan aplikasi AI Studio+',
       },
     ],
     locale: 'id_ID',
     type: 'website',
   },
-
-  // Twitter Card (untuk saat link dibagikan di Twitter/X)
   twitter: {
     card: 'summary_large_image',
-    title: 'Prompt Studio Pro - AI Text & Video Prompt Creator',
-    description: 'Dari ide sederhana menjadi prompt AI yang detail untuk teks dan video.',
-    images: ['/og-image.webp'], // Path ke gambar
+    title: 'AI Studio+ - AI Text, Video, Image Creator & Analyzer',
+    description: 'Dari ide sederhana menjadi prompt dan gambar AI yang detail.',
+    images: ['/og-image.webp'],
   },
-  
-  // Aturan untuk robot search engine
   robots: {
     index: true,
     follow: true,
@@ -59,11 +45,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-
-  // Ikon untuk website
   icons: {
     icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png', // Buat gambar ini dan letakkan di folder public jika perlu
+    apple: '/apple-touch-icon.png',
   },
 };
 
@@ -77,7 +61,15 @@ export default function RootLayout({
     <html lang="id">
       <body>
         <AuthProvider>
-          {children}
+            <div className="app-wrapper">
+              {/* Children (page.tsx) akan dirender di sini */}
+              {children}
+              <footer className="main-footer">
+                <p>
+                  &copy; {new Date().getFullYear()} AI Studio+. All Rights Reserved.
+                </p>
+              </footer>
+            </div>
         </AuthProvider>
       </body>
     </html>

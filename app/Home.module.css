@@ -1,7 +1,5 @@
 /* app/Home.module.css */
 
-/* Hapus :root dan .dark dari file ini, sudah ada di globals.css */
-
 /* Gaya untuk kontainer utama */
 .container {
   min-height: 100vh;
@@ -99,12 +97,18 @@
 /* Gaya untuk Tab Navigasi */
 .tabContainer {
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
   background-color: var(--input-background-color);
   padding: 0.5rem;
   border-radius: 10px;
   margin-bottom: 2rem;
   border: 1px solid var(--border-color);
+}
+
+.tabRow {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .tab {
@@ -148,6 +152,7 @@
   transition: background-color 0.3s, border-color 0.3s;
 }
 
+/* FIX: Menghilangkan border default dari fieldset */
 .form fieldset {
   border: none;
   padding: 0;
@@ -194,7 +199,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  margin-bottom: 1.5rem;
 }
 
 /* Gaya untuk Dropdown Kustom Radix UI */
@@ -306,6 +310,10 @@
 }
 
 /* Pengaturan Lanjutan */
+.advancedSettings {
+    margin-top: 1.5rem;
+}
+
 .summaryButton {
   font-weight: 600;
   cursor: pointer;
@@ -314,13 +322,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem; /* Memberi padding seperti tombol */
-  border-radius: 8px; /* Membuat sudut membulat */
-  background-color: var(--input-background-color); /* Warna latar belakang */
-  border: 1px solid var(--border-color); /* Garis batas */
-  width: 100%; /* Memanjang penuh */
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background-color: var(--input-background-color);
+  border: 1px solid var(--border-color);
+  width: 100%;
   transition: all 0.2s;
-  justify-content: space-between; /* Mendorong ikon panah ke kanan */
+  justify-content: space-between;
 }
 
 .summaryButton:hover {
@@ -331,7 +339,6 @@
   display: none; 
 }
 
-/* Mengatur transisi panah saat dibuka/ditutup */
 .summaryIcon {
     transition: transform 0.2s ease-in-out;
 }
@@ -408,12 +415,6 @@ details[open] .summaryIcon {
   border-radius: 12px;
   background-color: var(--card-background-color);
   box-shadow: none;
-  animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .resultHeader {
@@ -469,7 +470,7 @@ details[open] .summaryIcon {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7); /* Overlay gelap semi-transparan */
+    background-color: rgba(0, 0, 0, 0.7);
     color: white;
     display: flex;
     flex-direction: column;
@@ -477,20 +478,21 @@ details[open] .summaryIcon {
     justify-content: center;
     gap: 1rem;
     border-radius: 12px;
-    z-index: 5; /* Pastikan overlay berada di atas elemen form */
+    z-index: 5;
     text-align: center;
     padding: 2rem;
     font-size: 1.1rem;
     font-weight: 500;
-    backdrop-filter: blur(5px); /* Opsional: tambahkan efek blur */
+    backdrop-filter: blur(5px);
 }
 
 /* Gaya baru untuk fieldset yang dinonaktifkan */
 .fieldsetDisabled {
-    opacity: 0.5; /* Secara visual membuat form terlihat redup */
-    pointer-events: none; /* Mencegah interaksi dengan elemen di bawahnya */
+    opacity: 0.5;
+    pointer-events: none;
 }
-/* Gaya untuk Tombol Lebar di dalam Modal */
+
+/* Gaya untuk Tombol Lebar di dalam Modal Login */
 .authButtonWide {
   width: 100%;
   display: flex;
@@ -515,6 +517,11 @@ details[open] .summaryIcon {
 .authButtonWide:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.authIcon {
+  width: 20px;
+  height: 20px;
 }
 
 /* === Gaya untuk Dialog / Modal === */
@@ -600,41 +607,18 @@ details[open] .summaryIcon {
     transform: translate(-50%, -50%) scale(1);
   }
 }
-/* Gaya untuk ikon di dalam tombol login modal */
-.authIcon {
-  width: 20px;
-  height: 20px;
-}
 
-/* Gaya untuk hasil gambar */
-.imageLoadingContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    color: var(--text-secondary-color);
-    padding: 3rem 1rem;
-    min-height: 200px;
-}
-
-.imageResultContainer {
-    position: relative;
-    width: 100%;
-    margin-top: 1rem;
-}
-
-/* Gaya untuk Tombol Bersihkan */
+/* === Gaya untuk Generate Gambar === */
 .iconButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;  /* Lebar tetap */
-  height: 36px; /* Tinggi tetap */
+  width: 36px;
+  height: 36px;
   background-color: var(--input-background-color);
   border: 1px solid var(--border-color);
   color: var(--text-secondary-color);
-  border-radius: 8px; /* Sedikit lebih bulat */
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -650,7 +634,6 @@ details[open] .summaryIcon {
   cursor: not-allowed;
 }
 
-/* Gaya untuk Kontainer Preset */
 .presetContainer {
   display: flex;
   gap: 0.75rem;
@@ -673,60 +656,61 @@ details[open] .summaryIcon {
   border-color: var(--primary-color);
   background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
 }
-/* Gaya untuk Tombol Enhance Prompt (DIPERBARUI) 
-.enhanceButton {
+
+.checkboxContainer {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.75rem;
-  background-color: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary-color);
-  font-size: 0.9rem;
-  font-weight: 500;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
-.enhanceButton:hover:not(:disabled) {
-  background-color: var(--border-color);
-  color: var(--primary-color);
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--primary-color);
 }
 
-.enhanceButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-} */
-
-/* Gaya baru untuk kontainer tab yang memanjang */
-.tabContainerFull {
-  display: flex;
-  margin-top: 0.75rem; /* Beri sedikit jarak dari grup tab di atas */
-  background-color: var(--input-background-color);
-  padding: 0.5rem;
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-}
-/* Gaya untuk Tab Navigasi (DIPERBARUI) */
-.tabContainer {
-  display: flex;
-  flex-direction: column; /* Mengubah arah menjadi kolom */
-  gap: 0.5rem;
-  background-color: var(--input-background-color);
-  padding: 0.5rem;
-  border-radius: 10px;
-  margin-bottom: 2rem;
-  border: 1px solid var(--border-color);
-}
-
-/* Gaya baru untuk setiap baris tab */
-.tabRow {
+.imageLoadingContainer {
     display: flex;
-    gap: 0.5rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--text-secondary-color);
+    padding: 3rem 1rem;
+    min-height: 200px;
 }
 
-/* Ganti .zoomOverlay dan .zoomContent dengan style dari Dialog */
+.imageResultContainer {
+    position: relative;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.zoomButton {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+    backdrop-filter: blur(4px);
+    z-index: 10;
+}
+
+.zoomButton:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+}
+
 .zoomOverlay {
   background-color: rgba(0, 0, 0, 0.85);
   position: fixed;
@@ -736,7 +720,7 @@ details[open] .summaryIcon {
 }
 
 .zoomContent {
-  background-color: transparent; /* Kontennya hanya gambar */
+  background-color: transparent;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -769,7 +753,18 @@ details[open] .summaryIcon {
     transform: scale(1.2);
 }
 
-/* === Gaya Baru untuk Tombol Aksi === */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 .actionButtonsContainer {
     display: flex;
     justify-content: center;
@@ -797,49 +792,12 @@ details[open] .summaryIcon {
     color: var(--primary-color);
     border-color: var(--primary-color);
 }
-.zoomButton {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s;
-    backdrop-filter: blur(4px);
-    z-index: 10;
-}
 
-.zoomButton:hover {
-    background-color: rgba(0, 0, 0, 0.7);
-    transform: scale(1.1);
-}
-
-/* FIX: Style baru untuk menyembunyikan elemen secara visual tapi tetap bisa diakses screen reader */
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-/* === Gaya Baru untuk Riwayat Gambar === */
 .historyContainer {
     margin-top: 2.5rem;
     padding: 2rem;
     border-radius: 12px;
     background-color: var(--card-background-color);
-    animation: fadeIn 0.5s ease-out;
 }
 
 .historyTitle {
@@ -861,7 +819,7 @@ details[open] .summaryIcon {
 .historyItem {
     position: relative;
     width: 100%;
-    padding-top: 100%; /* Membuat kotak aspek 1:1 */
+    padding-top: 100%;
     border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
@@ -875,14 +833,14 @@ details[open] .summaryIcon {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Memastikan gambar mengisi kotak */
+    object-fit: cover;
 }
 
 .historyItem:hover {
     transform: scale(1.05);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
-/* === Gaya Baru untuk Empty State Riwayat === */
+
 .emptyStateCard {
     margin-top: 2.5rem;
     padding: 3rem 2rem;
@@ -911,4 +869,57 @@ details[open] .summaryIcon {
     max-width: 400px;
     color: var(--text-secondary-color);
     line-height: 1.6;
+}
+
+.uploadContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.uploadInput {
+    display: none;
+}
+
+.uploadButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--input-background-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary-color);
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.uploadButton:hover {
+    background-color: var(--border-color);
+}
+
+.previewContainer {
+    position: relative;
+}
+
+.clearUploadButton {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--card-background-color);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.clearUploadButton:hover {
+    transform: scale(1.1);
 }
