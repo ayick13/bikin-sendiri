@@ -94,14 +94,16 @@ export default function ImageAnalysis() {
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
-      {/* Login overlay dipindah ke luar form agar tidak hilang saat navigasi mobile */}
-      {!isLoggedIn && (
-        <div className={styles.loginOverlay} style={{ zIndex: 100 }}>
-          <Lock size={48} />
-          <p>Login untuk mengakses fitur Analisis Gambar ini.</p>
-        </div>
-      )}
+      {/* PERUBAHAN DI SINI:
+        Lapisan 'loginOverlay' sekarang dipindahkan ke dalam <form>
+      */}
       <form onSubmit={handleSubmit} className={styles.form} style={{ position: 'relative' }} autoComplete="off">
+        {!isLoggedIn && (
+          <div className={styles.loginOverlay}>
+            <Lock size={48} />
+            <p>Login untuk mengakses fitur Analisis Gambar ini.</p>
+          </div>
+        )}
         <fieldset className={!isLoggedIn ? styles.fieldsetDisabled : ''} disabled={!isLoggedIn || isLoading}>
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="image-upload">Unggah Gambar</label>

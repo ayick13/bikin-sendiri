@@ -3,7 +3,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import AuthProvider from "./components/AuthProvider";
-import SupportToast from "./components/SupportToast"; // Impor komponen baru
 // Impor ikon yang dibutuhkan dari lucide-react
 import { 
     Github, Globe, Cloud, Zap, Bot, Sparkles, Box, Triangle, Wind, KeyRound, 

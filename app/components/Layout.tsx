@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { signIn } from "next-auth/react";
 import * as Dialog from '@radix-ui/react-dialog';
-import styles from '../Home.module.css';
+import styles from '../Home.module.css'; // Path ini benar dari sini
 import { Sun, Moon, Monitor, Menu, X, LoaderCircle, Github } from 'lucide-react';
 import AuthButtons from './AuthButtons';
 import Image from "next/image";
@@ -21,18 +21,14 @@ type LayoutProps = {
 export default function Layout({ children }: LayoutProps) {
   const [theme, setTheme] = useState<Theme>('system');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-  // State untuk dialog login sekarang ada di sini
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
-
   const pathname = usePathname();
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  // Efek tema (tidak ada perubahan)
   useEffect(() => {
     const root = window.document.documentElement;
     const savedTheme = localStorage.getItem('theme') as Theme | null;
@@ -52,7 +48,6 @@ export default function Layout({ children }: LayoutProps) {
     };
 
     applyTheme(theme);
-
     const handleChange = (e: MediaQueryListEvent) => {
       if (theme === 'system') applyTheme('system');
     };
@@ -66,13 +61,11 @@ export default function Layout({ children }: LayoutProps) {
     localStorage.setItem('theme', newTheme);
   };
   
-  // Fungsi untuk menangani proses sign-in
   const handleSignIn = async (provider: 'google' | 'github') => {
-      setLoadingProvider(provider);
-      await signIn(provider, { callbackUrl: '/' });
+    setLoadingProvider(provider);
+    await signIn(provider, { callbackUrl: '/' });
   };
 
-  // Fungsi untuk membuka dialog login, sekaligus menutup menu mobile jika perlu
   const handleLoginTrigger = () => {
     if (isMobileMenuOpen) {
       setIsMobileMenuOpen(false);
@@ -154,7 +147,6 @@ export default function Layout({ children }: LayoutProps) {
         {children}
       </main>
 
-      {/* Dialog login sekarang menjadi bagian dari Layout utama */}
       <Dialog.Root open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
         <Dialog.Portal>
             <Dialog.Overlay className={styles.dialogOverlay} />
@@ -163,46 +155,22 @@ export default function Layout({ children }: LayoutProps) {
                 <Dialog.Description className={styles.dialogDescription}>
                     Pilih provider pilihan Anda untuk melanjutkan.
                 </Dialog.Description>
-                
                 <div className={styles.dialogAuthOptions}>
-                    <button
-                        onClick={() => handleSignIn('google')}
-                        className={styles.authButtonWide}
-                        disabled={!!loadingProvider}
-                    >
-                        {loadingProvider === 'google' ? <LoaderCircle size={20} className={styles.loadingIcon} /> : (
-                            <Image
-                                src="/google-icon.svg"
-                                alt="Google Icon"
-                                width={20}
-                                height={20}
-                                className={styles.authIcon}
-                            />
-                        )}
+                    <button onClick={() => handleSignIn('google')} className={styles.authButtonWide} disabled={!!loadingProvider}>
+                        {loadingProvider === 'google' ? <LoaderCircle size={20} className={styles.loadingIcon} /> : <Image src="/google-icon.svg" alt="Google Icon" width={20} height={20} className={styles.authIcon} />}
                         <span>{loadingProvider === 'google' ? 'Mengarahkan...' : 'Lanjutkan dengan Google'}</span>
                     </button>
-                    <button
-                        onClick={() => handleSignIn('github')}
-                        className={styles.authButtonWide}
-                        disabled={!!loadingProvider}
-                    >
+                    <button onClick={() => handleSignIn('github')} className={styles.authButtonWide} disabled={!!loadingProvider}>
                         {loadingProvider === 'github' ? <LoaderCircle size={20} className={styles.loadingIcon} /> : <Github className={styles.authIcon} />}
                         <span>{loadingProvider === 'github' ? 'Mengarahkan...' : 'Lanjutkan dengan GitHub'}</span>
                     </button>
                 </div>
-
                 <Dialog.Close asChild>
-                    <button className={styles.dialogCloseButton} aria-label="Close">
-                        <X size={20} />
-                    </button>
+                    <button className={styles.dialogCloseButton} aria-label="Close"><X size={20} /></button>
                 </Dialog.Close>
             </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
-
-      <footer className={styles.footer}>
-        <p>&copy; {new Date().getFullYear()} AI Studio+. All rights reserved.</p>
-      </footer>
     </div>
   );
 }
