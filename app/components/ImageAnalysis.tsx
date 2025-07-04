@@ -7,11 +7,13 @@ import Image from 'next/image';
 import { Toaster, toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import styles from '../Home.module.css';
-import { Eye, Lock, Upload, Wand2, Bot, LoaderCircle, XCircle } from 'lucide-react';
+import { Eye, Lock, Upload, Bot, LoaderCircle, XCircle, LogIn } from 'lucide-react';
+import { useAppContext } from './Layout'; // Import hook
 
 export default function ImageAnalysis() {
   const { data: session } = useSession();
   const isLoggedIn = !!session?.user;
+  const { handleLoginTrigger } = useAppContext(); // Gunakan hook
 
   const [question, setQuestion] = useState('What is in this image?');
   const [imageBase64, setImageBase64] = useState<string | null>(null);
@@ -94,14 +96,19 @@ export default function ImageAnalysis() {
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
-      {/* PERUBAHAN DI SINI:
-        Lapisan 'loginOverlay' sekarang dipindahkan ke dalam <form>
-      */}
       <form onSubmit={handleSubmit} className={styles.form} style={{ position: 'relative' }} autoComplete="off">
         {!isLoggedIn && (
           <div className={styles.loginOverlay}>
             <Lock size={48} />
             <p>Login untuk mengakses fitur Analisis Gambar ini.</p>
+            <button
+              type="button"
+              onClick={handleLoginTrigger}
+              className={styles.loginOverlayButton}
+            >
+              <LogIn size={18} />
+              Login Sekarang
+            </button>
           </div>
         )}
         <fieldset className={!isLoggedIn ? styles.fieldsetDisabled : ''} disabled={!isLoggedIn || isLoading}>
@@ -113,7 +120,6 @@ export default function ImageAnalysis() {
                 accept="image/png, image/jpeg, image/webp, image/gif"
                 onChange={handleFileChange}
                 ref={fileInputRef}
-                className={styles.uploadInput}
                 id="image-upload"
                 style={{ display: 'none' }}
               />

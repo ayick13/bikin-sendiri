@@ -6,11 +6,12 @@ import styles from '../Home.module.css';
 import { 
     Film, Clapperboard, Camera, Palette, Sparkles, Wand2, Copy, Check, 
     Sun, Aperture, Brush, Lock, Bot, Video, Star, Layers, BrainCircuit, 
-    Film as FilmIcon, Rocket, LoaderCircle // FIX: LoaderCircle ditambahkan di sini
+    Film as FilmIcon, Rocket, LoaderCircle, LogIn
 } from 'lucide-react';
 import CustomSelect from './CustomSelect';
 import { useSession } from 'next-auth/react';
 import ComingSoon from './ComingSoon';
+import { useAppContext } from './Layout'; // Import hook
 
 // Opsi untuk CustomSelect
 const moodOptions = [
@@ -69,10 +70,10 @@ const lensOptions = [
   { value: 'Other', label: 'Other' },
 ];
 
-// Komponen Form Generator yang sudah ada
 const DefaultVideoGenerator = () => {
     const { data: session } = useSession();
     const isLoggedIn = !!session?.user;
+    const { handleLoginTrigger } = useAppContext(); // Gunakan hook
 
     // State untuk input form
     const [subject, setSubject] = useState('Ironman Naik Pesawat');
@@ -159,6 +160,14 @@ const DefaultVideoGenerator = () => {
                     <div className={styles.loginOverlay}>
                         <Lock size={48} />
                         <p>Login untuk mengakses fitur ini.</p>
+                        <button
+                          type="button"
+                          onClick={handleLoginTrigger}
+                          className={styles.loginOverlayButton}
+                        >
+                          <LogIn size={18} />
+                          Login Sekarang
+                        </button>
                     </div>
                 )}
                 <fieldset className={!isLoggedIn ? styles.fieldsetDisabled : ''} disabled={!isLoggedIn || isLoading}>
@@ -230,7 +239,6 @@ const DefaultVideoGenerator = () => {
         </>
     );
 };
-
 
 export default function VideoPromptGenerator() {
   const [activeModel, setActiveModel] = useState('default');

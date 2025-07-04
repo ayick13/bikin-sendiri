@@ -8,16 +8,17 @@ import * as Dialog from '@radix-ui/react-dialog';
 import styles from '../Home.module.css';
 import {
     Image as ImageIcon, Wand2, Settings, LoaderCircle, Lock, Dices,
-    XCircle, Sparkles, ZoomIn, X, Copy, Download, Repeat, History, TriangleAlert, ChevronDown
+    XCircle, Sparkles, ZoomIn, X, Copy, Download, Repeat, History, TriangleAlert, ChevronDown, LogIn
 } from 'lucide-react';
 import { Toaster, toast } from 'react-hot-toast';
 import PresetButton from './PresetButton';
+import { useAppContext } from './Layout'; // Import hook
 
 // Tipe data
 type ImageModel = { id: string; };
 type HistoryItem = {
     id: string;
-    imageUrl: string; // Akan menyimpan Base64 data URL
+    imageUrl: string;
     prompt: string;
     seed: number | '';
 };
@@ -59,6 +60,7 @@ const saveHistoryToStorage = (history: HistoryItem[]) => {
 export default function ImageGenerator() {
     const { data: session } = useSession();
     const isLoggedIn = !!session?.user;
+    const { handleLoginTrigger } = useAppContext(); // Gunakan hook
 
     // State Form
     const [prompt, setPrompt] = useState('A majestic lion in a futuristic city, neon lights');
@@ -167,7 +169,6 @@ export default function ImageGenerator() {
 
         const fullPrompt = negativePrompt ? `${prompt} --neg ${negativePrompt}` : prompt;
         
-        // --- BAGIAN YANG DIPERBAIKI ---
         const params = new URLSearchParams({
             model,
             width: width.toString(),
@@ -180,7 +181,6 @@ export default function ImageGenerator() {
             private: isPrivate.toString(),
         });
         const apiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?${params.toString()}`;
-        // -----------------------------
 
         try {
             const response = await fetch(apiUrl);
@@ -206,7 +206,7 @@ export default function ImageGenerator() {
             setHistory(prevHistory => {
                 const newHistoryItem: HistoryItem = { id: new Date().toISOString(), imageUrl: base64data, prompt, seed: currentSeed };
                 const updatedHistory = [newHistoryItem, ...prevHistory].slice(0, MAX_HISTORY_ITEMS);
-                saveHistoryToStorage(updatedHistory); // Simpan ke storage
+                saveHistoryToStorage(updatedHistory);
                 return updatedHistory;
             });
 
@@ -273,6 +273,14 @@ export default function ImageGenerator() {
                     <div className={styles.loginOverlay}>
                         <Lock size={48} />
                         <p>Login untuk mengakses fitur Generate Gambar ini.</p>
+                        <button
+                          type="button"
+                          onClick={handleLoginTrigger}
+                          className={styles.loginOverlayButton}
+                        >
+                          <LogIn size={18} />
+                          Login Sekarang
+                        </button>
                     </div>
                 )}
                 <fieldset className={!isLoggedIn ? styles.fieldsetDisabled : ''} disabled={!isLoggedIn || isLoading || isEnhancing}>

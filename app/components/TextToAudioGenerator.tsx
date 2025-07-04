@@ -4,9 +4,10 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import styles from '../Home.module.css';
-import { Volume2, Wand2, LoaderCircle, Lock, Download } from 'lucide-react';
+import { Volume2, Wand2, LoaderCircle, Lock, Download, LogIn } from 'lucide-react';
 import CustomSelect from './CustomSelect';
 import { Toaster, toast } from 'react-hot-toast';
+import { useAppContext } from './Layout'; // Import hook
 
 const voiceOptions = [
   { value: 'alloy', label: 'Alloy' },
@@ -20,6 +21,7 @@ const voiceOptions = [
 export default function TextToAudioGenerator() {
   const { data: session } = useSession();
   const isLoggedIn = !!session?.user;
+  const { handleLoginTrigger } = useAppContext(); // Gunakan hook
 
   const [prompt, setPrompt] = useState('Hello, world! This is a test of the text-to-audio generation.');
   const [voice, setVoice] = useState('nova');
@@ -86,11 +88,18 @@ export default function TextToAudioGenerator() {
     <>
       <Toaster position="top-center" reverseOrder={false} />
       <form onSubmit={handleSubmit} className={styles.form} style={{ position: 'relative' }} autoComplete="off">
-        {/* ... form content ... */}
         {!isLoggedIn && (
           <div className={styles.loginOverlay}>
             <Lock size={48} />
             <p>Login untuk mengakses fitur Text-to-Audio ini.</p>
+            <button
+              type="button"
+              onClick={handleLoginTrigger}
+              className={styles.loginOverlayButton}
+            >
+              <LogIn size={18} />
+              Login Sekarang
+            </button>
           </div>
         )}
         <fieldset className={!isLoggedIn ? styles.fieldsetDisabled : ''} disabled={!isLoggedIn || isLoading}>
@@ -134,7 +143,6 @@ export default function TextToAudioGenerator() {
             Your browser does not support the audio element.
           </audio>
           
-          {/* PERUBAHAN DI SINI: Gunakan class yang lebih spesifik */}
           <div className={styles.audioResultActions}>
             <button onClick={handleDownloadAudio} className={styles.actionButton} title="Unduh Audio">
               <Download size={16} /> Unduh Audio
