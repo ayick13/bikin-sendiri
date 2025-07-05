@@ -760,6 +760,20 @@ details[open] .summaryIcon {
   background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
 }
 
+/* Tambahkan ini untuk style tombol yang nonaktif */
+.presetButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--input-background-color);
+  border-color: var(--border-color);
+  color: var(--text-secondary-color);
+}
+.presetButton:disabled:hover {
+   background-color: var(--input-background-color);
+   border-color: var(--border-color);
+   color: var(--text-secondary-color);
+}
+
 .checkboxContainer {
   display: flex;
   align-items: center;
@@ -1243,6 +1257,18 @@ details[open] .summaryIcon {
   .themeSwitchContainer {
     display: flex !important;
     margin-left: auto;
+  }
+
+  /* Perbaikan untuk tombol tutup (close) pada modal zoom gambar */
+  .zoomContent {
+    /* Kurangi padding di layar kecil agar ada lebih banyak ruang */
+    padding: 0.5rem;
+  }
+
+  .zoomCloseButton {
+    /* Pindahkan tombol sedikit lebih ke dalam dari tepi */
+    top: 0.75rem;
+    right: 0.75rem;
   }
 }
 
