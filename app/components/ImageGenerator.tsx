@@ -8,13 +8,13 @@ import * as Dialog from '@radix-ui/react-dialog';
 import styles from '../Home.module.css';
 import {
     Image as ImageIcon, Wand2, Settings, LoaderCircle, Lock, Dices,
-    XCircle, Sparkles, ZoomIn, X, Copy, Download, Repeat, History, TriangleAlert, ChevronDown, LogIn
+    XCircle, Sparkles, ZoomIn, X, Copy, Download, Repeat, History, KeyRound, LogIn
 } from 'lucide-react';
 import { Toaster, toast } from 'react-hot-toast';
 import PresetButton from './PresetButton';
-import { useAppContext } from './Layout'; // Import hook
+import { useAppContext } from './Layout';
 
-// Tipe data
+// Tipe data yang ada
 type ImageModel = { id: string; };
 type HistoryItem = {
     id: string;
@@ -23,7 +23,7 @@ type HistoryItem = {
     seed: number | '';
 };
 
-// Fungsi bantuan untuk manajemen localStorage
+// Fungsi bantuan localStorage
 const LOCAL_STORAGE_KEY = 'imageHistory';
 const MAX_HISTORY_ITEMS = 10;
 const LOCAL_STORAGE_LIMIT_MB = 4.5; // Batas aman (dari 5MB)
@@ -57,10 +57,11 @@ const saveHistoryToStorage = (history: HistoryItem[]) => {
     }
 };
 
+
 export default function ImageGenerator() {
     const { data: session } = useSession();
     const isLoggedIn = !!session?.user;
-    const { handleLoginTrigger } = useAppContext(); // Gunakan hook
+    const { handleLoginTrigger } = useAppContext();
 
     // State Form
     const [prompt, setPrompt] = useState('A majestic lion in a futuristic city, neon lights');
@@ -81,6 +82,13 @@ export default function ImageGenerator() {
     const [history, setHistory] = useState<HistoryItem[]>([]);
     const [isZoomed, setIsZoomed] = useState(false);
 
+    // State baru untuk DALL-E 3
+    const [isDalleModalOpen, setIsDalleModalOpen] = useState(false);
+    const [openaiApiKey, setOpenaiApiKey] = useState('');
+    const [tempApiKey, setTempApiKey] = useState(''); // Untuk input di modal
+    const [isKeyValidating, setIsKeyValidating] = useState(false);
+
+
     useEffect(() => {
         setHistory(getHistoryFromStorage());
         const fetchModels = async () => {
@@ -89,16 +97,52 @@ export default function ImageGenerator() {
                 const response = await fetch('https://image.pollinations.ai/models');
                 if (!response.ok) throw new Error('Gagal memuat model gambar');
                 const modelsData = await response.json();
-                setAvailableModels(modelsData.map((id: string) => ({ id })));
+                const pollinationModels = modelsData.map((id: string) => ({ id }));
+                // Menambahkan DALL-E 3 secara manual
+                setAvailableModels([...pollinationModels, { id: 'dall-e-3' }]);
             } catch (err: any) {
                 toast.error('Gagal mengambil daftar model AI.');
-                setAvailableModels([{ id: 'flux' }]);
+                setAvailableModels([{ id: 'flux' }, { id: 'dall-e-3' }]);
             } finally {
                 setModelsLoading(false);
             }
         };
+
+        // Memuat kunci API dari session storage jika ada
+        const storedApiKey = sessionStorage.getItem('openai_api_key');
+        if (storedApiKey) {
+            setOpenaiApiKey(storedApiKey);
+        }
+
         fetchModels();
     }, []);
+
+    const handleModelChange = (selectedModel: string) => {
+        if (selectedModel === 'dall-e-3') {
+            setIsDalleModalOpen(true);
+        } else {
+            setModel(selectedModel);
+        }
+    };
+    
+    const handleApiKeySubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsKeyValidating(true);
+        setError('');
+
+        if (!tempApiKey.startsWith('sk-')) {
+            toast.error('Format API Key tidak valid. Seharusnya dimulai dengan "sk-".');
+            setIsKeyValidating(false);
+            return;
+        }
+
+        setOpenaiApiKey(tempApiKey);
+        sessionStorage.setItem('openai_api_key', tempApiKey);
+        toast.success('API Key disimpan untuk sesi ini!');
+        setModel('dall-e-3');
+        setIsDalleModalOpen(false);
+        setIsKeyValidating(false);
+    };
 
     const handleClear = () => {
         setPrompt('');
@@ -154,8 +198,15 @@ export default function ImageGenerator() {
     const generateImage = useCallback(async (options: { forceNewSeed: boolean } = { forceNewSeed: false }) => {
         if (!isLoggedIn || isLoading || !prompt) {
             if (!prompt) toast.error("Prompt tidak boleh kosong!");
+            if (!isLoggedIn) handleLoginTrigger();
             return;
         };
+        
+        if (model === 'dall-e-3' && !openaiApiKey) {
+            toast.error("API Key OpenAI diperlukan untuk menggunakan DALL-E 3.");
+            setIsDalleModalOpen(true);
+            return;
+        }
 
         setIsLoading(true);
         setImageUrl('');
@@ -165,46 +216,69 @@ export default function ImageGenerator() {
         const currentSeed = options.forceNewSeed || !seed
             ? Math.floor(Math.random() * 1000000)
             : seed;
-        setSeed(currentSeed);
-
-        const fullPrompt = negativePrompt ? `${prompt} --neg ${negativePrompt}` : prompt;
-        
-        const params = new URLSearchParams({
-            model,
-            width: width.toString(),
-            height: height.toString(),
-            seed: currentSeed.toString(),
-            referrer: 'bikinsendiri.my.id',
-            nologo: 'true',
-            enhance: 'true',
-            safe: 'false',
-            private: isPrivate.toString(),
-        });
-        const apiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?${params.toString()}`;
+        if (model !== 'dall-e-3') {
+            setSeed(currentSeed);
+        }
 
         try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) {
-                throw new Error(`Gagal menghasilkan gambar (Error: ${response.status})`);
-            }
-            const imageBlob = await response.blob();
-            if (!imageBlob.type.startsWith('image/')) {
-                throw new Error('Respons dari API bukan file gambar yang valid.');
+            let base64data;
+
+            if (model === 'dall-e-3') {
+                const response = await fetch('/api/generate-dalle-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt,
+                        apiKey: openaiApiKey,
+                        size: `${width}x${height}` // Gunakan state ukuran yang ada
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Gagal menghasilkan gambar dengan DALL-E 3');
+                }
+                const result = await response.json();
+                base64data = result.b64_json;
+            } else {
+                const fullPrompt = negativePrompt ? `${prompt} --neg ${negativePrompt}` : prompt;
+                const params = new URLSearchParams({
+                    model,
+                    width: width.toString(),
+                    height: height.toString(),
+                    seed: currentSeed.toString(),
+                    referrer: 'bikinsendiri.my.id',
+                    nologo: 'true',
+                    enhance: 'true',
+                    safe: 'false',
+                    private: isPrivate.toString(),
+                });
+                const apiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?${params.toString()}`;
+
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`Gagal menghasilkan gambar (Error: ${response.status})`);
+                }
+                const imageBlob = await response.blob();
+                if (!imageBlob.type.startsWith('image/')) {
+                    throw new Error('Respons dari API bukan file gambar yang valid.');
+                }
+                
+                base64data = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(imageBlob);
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.onerror = (error) => reject(new Error("Gagal mengonversi gambar."));
+                });
             }
 
-            const base64data = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(imageBlob);
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.onerror = (error) => reject(new Error("Gagal mengonversi gambar untuk riwayat."));
-            });
-
-            setImageUrl(base64data);
+            const finalImageUrl = model === 'dall-e-3' ? `data:image/png;base64,${base64data}` : base64data;
+            setImageUrl(finalImageUrl);
             toast.dismiss(loadingToast);
             toast.success('Gambar berhasil dibuat!');
 
             setHistory(prevHistory => {
-                const newHistoryItem: HistoryItem = { id: new Date().toISOString(), imageUrl: base64data, prompt, seed: currentSeed };
+                const newHistoryItem: HistoryItem = { id: new Date().toISOString(), imageUrl: finalImageUrl, prompt, seed: model === 'dall-e-3' ? '' : currentSeed };
                 const updatedHistory = [newHistoryItem, ...prevHistory].slice(0, MAX_HISTORY_ITEMS);
                 saveHistoryToStorage(updatedHistory);
                 return updatedHistory;
@@ -218,7 +292,7 @@ export default function ImageGenerator() {
         } finally {
             setIsLoading(false);
         }
-    }, [isLoggedIn, isLoading, model, width, height, prompt, negativePrompt, isPrivate, seed]);
+    }, [isLoggedIn, isLoading, model, width, height, prompt, negativePrompt, isPrivate, seed, openaiApiKey, handleLoginTrigger]);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -226,8 +300,13 @@ export default function ImageGenerator() {
     };
 
     const handleVariations = () => {
-        toast('Membuat variasi dengan seed baru...', { icon: '🎨' });
-        generateImage({ forceNewSeed: true });
+        if (model === 'dall-e-3') {
+            toast('Membuat variasi baru...', { icon: '🎨' });
+            generateImage({ forceNewSeed: true }); // DALL-E tidak pakai seed, jadi ini akan selalu baru
+        } else {
+            toast('Membuat variasi dengan seed baru...', { icon: '🎨' });
+            generateImage({ forceNewSeed: true });
+        }
     };
 
     const handleCopyPrompt = () => {
@@ -239,7 +318,8 @@ export default function ImageGenerator() {
         if (!imageUrl) return;
         const link = document.createElement('a');
         link.href = imageUrl;
-        link.download = `${prompt.substring(0, 30).replace(/\s/g, '_')}_${seed}.png`;
+        const downloadSeed = model === 'dall-e-3' ? 'dalle3' : seed;
+        link.download = `${prompt.substring(0, 30).replace(/\s/g, '_')}_${downloadSeed}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -305,26 +385,27 @@ export default function ImageGenerator() {
                         <summary className={styles.summaryButton}>
                             <Settings size={16} />
                             Pengaturan Lanjutan
-                            <ChevronDown size={20} className={styles.summaryIcon} />
                         </summary>
 
                         <div className={styles.formGroup} style={{ marginTop: '1.5rem' }}>
                             <label htmlFor="negative-prompt" className={styles.label}>Negative Prompt (Opsional)</label>
-                            <input id="negative-prompt" type="text" value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} placeholder="Contoh: teks, watermark..." className={styles.input} />
+                            <input id="negative-prompt" type="text" value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} placeholder="Contoh: teks, watermark..." className={styles.input} disabled={model === 'dall-e-3'}/>
+                             {model === 'dall-e-3' && <small style={{marginTop: '0.5rem', display: 'block'}}>Negative prompt tidak didukung untuk DALL-E 3.</small>}
                         </div>
                         <div className={styles.formGroup}>
                             <label className={styles.label}>Preset Ukuran</label>
                             <div className={styles.presetContainer}>
                                 <PresetButton label="Square" width={1024} height={1024} onClick={setPresetSize} />
-                                <PresetButton label="Portrait" width={1024} height={1792} onClick={setPresetSize} />
-                                <PresetButton label="Landscape" width={1792} height={1024} onClick={setPresetSize} />
+                                <PresetButton label="Portrait" width={1024} height={1792} onClick={setPresetSize} disabled={model === 'dall-e-3'} />
+                                <PresetButton label="Landscape" width={1792} height={1024} onClick={setPresetSize} disabled={model === 'dall-e-3'} />
                             </div>
+                             {model === 'dall-e-3' && <small style={{marginTop: '0.5rem', display: 'block'}}>DALL-E 3 saat ini hanya mendukung ukuran 1024x1024, 1024x1792, and 1792x1024.</small>}
                         </div>
 
                         <div className={styles.controlsGrid}>
                             <div className={styles.formGroup}>
                                 <label htmlFor="model-image" className={styles.label}>Model</label>
-                                <select id="model-image" value={model} onChange={(e) => setModel(e.target.value)} className={styles.input} disabled={modelsLoading}>
+                                <select id="model-image" value={model} onChange={(e) => handleModelChange(e.target.value)} className={styles.input} disabled={modelsLoading}>
                                     {modelsLoading ? (
                                         <option>Memuat model...</option>
                                     ) : (
@@ -335,9 +416,10 @@ export default function ImageGenerator() {
                             <div className={styles.formGroup}>
                                 <label htmlFor="seed-image" className={styles.label}>Seed</label>
                                 <div className={styles.seedContainer}>
-                                    <input id="seed-image" type="number" value={seed} onChange={(e) => setSeed(e.target.value ? parseInt(e.target.value) : '')} placeholder="Angka acak" className={styles.input} />
-                                    <button type="button" onClick={generateRandomSeed} aria-label="Generate random seed"><Dices size={18} /></button>
+                                    <input id="seed-image" type="number" value={seed} onChange={(e) => setSeed(e.target.value ? parseInt(e.target.value) : '')} placeholder="Angka acak" className={styles.input} disabled={model === 'dall-e-3'} />
+                                    <button type="button" onClick={generateRandomSeed} aria-label="Generate random seed" disabled={model === 'dall-e-3'}><Dices size={18} /></button>
                                 </div>
+                                {model === 'dall-e-3' && <small style={{marginTop: '0.5rem', display: 'block'}}>Seed tidak didukung untuk DALL-E 3.</small>}
                             </div>
                         </div>
                         <div className={styles.controlsGrid}>
@@ -407,6 +489,46 @@ export default function ImageGenerator() {
                     </div>
                 </div>
             )}
+
+            <Dialog.Root open={isDalleModalOpen} onOpenChange={(isOpen) => {
+                setIsDalleModalOpen(isOpen);
+                if (!isOpen && model === 'dall-e-3' && !openaiApiKey) {
+                    setModel('flux');
+                }
+            }}>
+              <Dialog.Portal>
+                  <Dialog.Overlay className={styles.dialogOverlay} />
+                  <Dialog.Content className={styles.dialogContent}>
+                      <Dialog.Title className={styles.dialogTitle}>
+                        <KeyRound size={24} style={{marginRight: '0.75rem'}}/>
+                        Masukkan API Key OpenAI
+                      </Dialog.Title>
+                      <Dialog.Description className={styles.dialogDescription}>
+                          Untuk menggunakan model DALL-E 3, Anda perlu memasukkan API key OpenAI Anda. Kunci ini hanya akan disimpan di browser Anda untuk sesi ini.
+                      </Dialog.Description>
+                      <form onSubmit={handleApiKeySubmit}>
+                          <div className={styles.formGroup}>
+                              <label htmlFor="api-key-input" className={styles.label}>OpenAI API Key</label>
+                              <input
+                                  id="api-key-input"
+                                  type="password"
+                                  value={tempApiKey}
+                                  onChange={(e) => setTempApiKey(e.target.value)}
+                                  placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+                                  className={styles.input}
+                                  required
+                              />
+                          </div>
+                          <button type="submit" className={styles.button} disabled={isKeyValidating}>
+                              {isKeyValidating ? <LoaderCircle size={22} className={styles.loadingIcon} /> : 'Simpan & Gunakan Model'}
+                          </button>
+                      </form>
+                      <Dialog.Close asChild>
+                          <button className={styles.dialogCloseButton} aria-label="Close"><X size={20} /></button>
+                      </Dialog.Close>
+                  </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
         </>
     );
 }
