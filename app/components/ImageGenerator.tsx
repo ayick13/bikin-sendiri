@@ -8,7 +8,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import styles from '../Home.module.css';
 import {
     Image as ImageIcon, Wand2, Settings, LoaderCircle, Lock, Dices,
-    XCircle, Sparkles, ZoomIn, X, Copy, Download, Repeat, History, KeyRound, LogIn
+    XCircle, Sparkles, ZoomIn, X, Copy, Download, Repeat, History, KeyRound, ChevronDown, LogIn
 } from 'lucide-react';
 import { Toaster, toast } from 'react-hot-toast';
 import PresetButton from './PresetButton';
@@ -381,12 +381,13 @@ export default function ImageGenerator() {
                         <textarea id="prompt-image" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Contoh: seekor kucing astronot..." rows={4} className={styles.textarea} required />
                     </div>
 
-                    <details className={styles.advancedSettings}>
-                        <summary className={styles.summaryButton}>
-                            <Settings size={16} />
-                            Pengaturan Lanjutan
-                        </summary>
-
+                   <details className={styles.advancedSettings}>
+                    <summary className={styles.summaryButton}>
+                        <Settings size={16} />
+                        Pengaturan Lanjutan
+                        {/* TAMBAHKAN: Ikon Chevron yang hilang */}
+                        <ChevronDown size={20} className={styles.summaryIcon} />
+                    </summary>  
                         <div className={styles.formGroup} style={{ marginTop: '1.5rem' }}>
                             <label htmlFor="negative-prompt" className={styles.label}>Negative Prompt (Opsional)</label>
                             <input id="negative-prompt" type="text" value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} placeholder="Contoh: teks, watermark..." className={styles.input} disabled={model === 'dall-e-3'}/>

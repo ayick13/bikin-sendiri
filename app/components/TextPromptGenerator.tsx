@@ -143,8 +143,13 @@ export default function TextPromptGenerator() {
             <textarea id="details" value={details} onChange={(e) => setDetails(e.target.value)} placeholder="Contoh: memakai helm kaca, mengambang di luar angkasa" rows={2} className={styles.textarea} />
         </div>
         <details className={styles.advancedSettings}>
-            <summary><SlidersHorizontal size={16}/> Pengaturan Lanjutan <ChevronDown size={20} /></summary>
-            <div className={styles.controlsGrid}>
+    {/* PERBAIKI: Tambahkan class ke summary dan ikon */}
+    <summary className={styles.summaryButton}>
+        <SlidersHorizontal size={16}/>
+        Pengaturan Lanjutan
+        <ChevronDown size={20} className={styles.summaryIcon} />
+    </summary>
+    <div className={styles.controlsGrid}>
               <div className={styles.select}>
                 <label htmlFor="model" className={styles.label}>Model</label>
                 <CustomSelect
